@@ -1,0 +1,44 @@
+services:
+  backend:
+    build: ./Nicebar/backend
+    ports:
+      - "5000:5000" 
+    networks:
+      - nicebar_network
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/nicebar
+      SESSION_SECRET: twoj_dlugi_sekretny_klucz
+    volumes:
+      - ./Nicebar/backend:/app       
+      - /app/node_modules
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./Nicebar/frontend
+    ports:
+      - "5173:5173"  
+    networks:
+      - nicebar_network
+    environment:
+      VITE_API_URL: http://localhost:5000 
+    volumes:
+      - ./Nicebar/frontend:/app
+      - /app/node_modules
+
+  mongodb:
+    image: mongo:8.2  
+    ports:
+      - "27017:27017"  
+    networks:
+      - nicebar_network
+    volumes:
+      - mongo-data:/data/db  
+
+networks:
+  nicebar_network:
+    driver: bridge 
+
+volumes:
+  mongo-data:
+    driver: local  
