@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './services/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -6,12 +6,13 @@ import Navbar from './components/Navbar';
 import Login from './pages/login/Login'
 import Register from './pages/register/Register';
 import User from './pages/user/User'
+import ChangePassword from './pages/user/ChangePassword'
+import ChangeAddress from './pages/user/ChangeAddress';
+import UserPromote from './pages/user/UserPromote';
 
 import Blog from './pages/blog/Blog';
 import AddPost from './pages/blog/AddPost';
 import SinglePost from './pages/blog/SinglePost';
-
-// import Dashboard from './components/Dashboard';
 
 import './App.css'
 
@@ -28,9 +29,12 @@ function App() {
           <Route path="/register" element={<Register />} />
           
           <Route path="/account" element={<User />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/change-address" element={<ChangeAddress />} />
+          <Route path="/user-promote" element={<UserPromote />} />
 
-          <Route path="/:id" element={<SinglePost />} />
+          <Route path="/posts/:id" element={<SinglePost />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -41,7 +41,6 @@ export const login = async (req, res) => {
             lastName: user.lastName,
             role: user.role,
             createdAt: user.createdAt
-            // (W przyszłości dodasz tu też 'address')
         };
 
         const userId = user._id
@@ -80,3 +79,99 @@ export const checkStatus = async (req, res) => {
         res.status(500).json({message: "Błąd serwera przy checkStatus"})
     }
 }
+
+export const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Wszystkie pola są wymagane" });
+    }
+
+    try {
+        const user = await User.findById(req.session.userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Obecne hasło jest nieprawidłowe" });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedNewPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Hasło zostało zmienione pomyślnie" });
+
+    } catch (error) {
+        console.error("Błąd zmiany hasła:", error);
+        res.status(500).json({ message: "Błąd serwera przy zmianie hasła" });
+    }
+    };
+
+export const updateAddress = async (req, res) => {
+    const { streetName, streetNumber, city, postalCode } = req.body;
+
+    try {
+        const user = await User.findById(req.session.userId).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
+        }
+
+        user.address = {
+            streetName,
+            streetNumber,
+            city,
+            postalCode
+        };
+        await user.save();
+
+        res.status(200).json({ 
+            message: "Adres zaktualizowany", 
+            user: user 
+        });
+
+    } catch (error) {
+        console.error("Błąd zmiany adresu:", error);
+        res.status(500).json({ message: "Błąd serwera przy zmianie adresu" });
+    }
+};
+
+export const promoteToAdmin = async (req, res) => {
+    const { secretCode } = req.body;
+
+    if (!secretCode) {
+        return res.status(400).json({ message: "Podaj kod!" });
+    }
+
+    if (secretCode !== process.env.ADMIN_SECRET_KEY) {
+        return res.status(403).json({ message: "Nieprawidłowy kod autoryzacyjny" });
+    }
+
+    try {
+        const user = await User.findById(req.session.userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
+        }
+
+        user.role = 'admin';
+        await user.save();
+
+        const userToSend = user.toObject();
+        delete userToSend.password;
+
+        res.status(200).json({ 
+            message: "Gratulacje! Zostałeś adminem.", 
+            user: userToSend 
+        });
+
+    } catch (error) {
+        console.error("Błąd awansu:", error);
+        res.status(500).json({ message: "Błąd serwera" });
+    }
+};

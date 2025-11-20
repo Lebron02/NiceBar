@@ -70,7 +70,7 @@ const Blog = () => {
                     <div className='grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5 w-full'>
                         {
                             posts.map((post) => (
-                                <Link to={post._id} key={post._id}>
+                                <Link to={`/posts/${post._id}`} key={post._id}>
                                     <div className='relative overflow-hidden rounded-lg shadow-sm transition hover:shadow-lg h-full flex flex-col'>
                                         <img alt="" src="https://images.unsplash.com/photo-1661956602116-aa6865609028?auto=format&amp;fit=crop&amp;q=80&amp;w=1160" className="absolute inset-0 h-full w-full object-cover"/>
                                         <div className="relative bg-linear-to-t from-gray-900/50 to-gray-900/25 pt-32 sm:pt-48 lg:pt-64 flex flex-1 flex-col " >

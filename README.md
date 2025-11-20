@@ -5,13 +5,13 @@
 nr. albumu: 36060
 
 ## Temat projektu
-Sklep internetowy z artykułami barmańskimi i wbudowanym systemem treści edukacyjnych
+Sklep internetowy z artykułami barmańskimi i wbudowanym systemem treści edukacyjnych.
 
 ## Opis projektu
-NiceBar to pełnowymiarowa aplikacja typu Headless Commerce umożliwiająca prowadzenie bloga. System pozwala użytkownikom na przeglądanie treści, a po zalogowaniu na interakcję z serwisem.
+NiceBar to aplikacja typu Headless Commerce umożliwiająca prowadzenie bloga oraz sprzedaż produktów. **W ramach przedmiotu przetestowany zostanie moduł bloga oraz system autentykacji i autoryzacji.** System pozwala niezalogowanym użytkownikom na przeglądanie treści, a po zalogowaniu na interakcję z serwisem.
 
 **Główne funkcjonalności:**
-- **Autentykacja i autoryzacja:** Bezpieczny system logowania i rejestracji oparty na sesjach serwerowych (server-side sessions) przechowywanych w bazie MongoDB oraz ciasteczkach `httpOnly`. Hasła użytkowników są szyfrowane.
+- **Autentykacja i autoryzacja:** Bezpieczny system logowania i rejestracji oparty na sesjach serwerowych (server-side sessions) przechowywanych w bazie MongoDB oraz ciasteczkach `httpOnly`. Hasła użytkowników są szyfrowane. Możliwa jest zmiana adresu przypisanego do konta użytkownika oraz hasło. Istnieje również możliwość zmiany uprawnień z użytkowinka na administratora po wpisaniu tajnego kodu. 
 - **Zarządzanie postami (CRUD):** Możliwość dodawania, edytowania, usuwania oraz przeglądania szczegółów postów.
 - **System komentarzy:** Zalogowani użytkownicy mogą komentować wpisy.
 - **Profile użytkowników:** Możliwość podglądu danych profilowych oraz uzupełnienia adresu.
@@ -19,9 +19,15 @@ NiceBar to pełnowymiarowa aplikacja typu Headless Commerce umożliwiająca prow
 
 Aplikacja została konteneryzowana przy użyciu platformy Docker, co zapewnia łatwość uruchomienia i spójność środowiska.
 
+## Film z funkcjonowania aplikacji
+Film prezentuje uruchomienie środowiska Docker, wszystkie funkcjonalności aplikacji(moduł bloga), oraz obsługę autentykacji za pomocą **Express-Session i Connect-Mongo**  
+**https://drive.google.com/file/d/1xTwAVIDrqsDtPar8HiEgixRw4RjM4r8o/view?usp=sharing**
+
 ## Uruchomienie projektu
 
-Projekt jest w pełni skonfigurowany do pracy z Dockerem. Aby uruchomić całe środowisko (Backend, frontend oraz bazę danych), należy wykonać poniższą komendę w głównym katalogu projektu:
+> **Uwaga: Wymagane jest zainstalowane środowisko Docker. Baza danych automatycznie tworzy pusty wolumen na dysku twardym w formie folderu. Nie będzie on posiadał żadnych istniejących kont ani postów(trzeba utworzyć je własnoręcznie). Po wyłączeniu środowiska i jego ponownym uruchomieniu poprzednio utworzone dane w bazie danych zostaną pobrane z lokalnego wolumenu.**
+
+**Projekt jest w pełni skonfigurowany do pracy z Dockerem. Aby uruchomić całe środowisko (Backend, Frontend oraz bazę danych), należy wykonać poniższą komendę w głównym katalogu projektu:**
 
 ```bash
 docker-compose up --build

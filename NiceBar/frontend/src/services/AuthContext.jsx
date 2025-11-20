@@ -1,8 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Ważne: AuthProvider musi być dzieckiem <BrowserRouter>
+import { useNavigate } from 'react-router-dom'; 
 
-const API_URL = "http://localhost:5000/api"; // Zmień, jeśli jest inny
+const API_URL = "http://localhost:5000/api"; 
 
 const api = axios.create({
     baseURL: API_URL,
@@ -86,7 +86,44 @@ export const AuthProvider = ({ children }) => {
             };
     };
 
-    
+    const changePassword = async (currentPassword, newPassword) => {
+        setLoading(true);
+        try {
+            await api.put('/auth/change-password', { currentPassword, newPassword });
+            return { success: true };
+        } catch (error) {
+            console.error("Błąd zmiany hasła:", error.response?.data?.message);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateAddress = async (addressData) => {
+        setLoading(true);
+        try {
+            const res = await api.put('/auth/update-address', addressData);
+            
+            setUser(res.data.user);
+            
+        } catch (error) {
+            console.error("Błąd zmiany adresu:", error.response?.data?.message);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const promoteToAdmin = async (secretCode) => {
+        setLoading(true);
+        try {
+            const res = await api.put('/auth/promote', { secretCode });
+            setUser(res.data.user);
+            return { success: true };
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const logout = async () => {
         await api.post(`/auth/logout`);
@@ -103,6 +140,9 @@ export const AuthProvider = ({ children }) => {
         addPost,
         updatePost,
         logout,
+        changePassword,
+        updateAddress,
+        promoteToAdmin,
         api, 
         user,
     };
@@ -118,6 +158,7 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
