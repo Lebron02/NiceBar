@@ -18,6 +18,14 @@ const Navbar = () => {
             url: '/'
         },
         {
+            name: 'Blog',
+            url: '/blog'
+        },
+        {
+            name: 'Koszyk',
+            url: '/cart'
+        },
+        {
             name: 'Konto',
             url: '/account'
         },

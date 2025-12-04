@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 
 import { Button } from "@/components/ui/button"
@@ -21,13 +21,17 @@ const Login = () => {
     const [error, setError] = useState('');
     
     const { login, loading } = useAuth(); 
+    const location = useLocation();
+
+    const searchParams = new URLSearchParams(location.search);
+    const redirectPath = searchParams.get('redirect') || '/';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(''); 
 
         try {
-            await login(email, password);
+            await login(email, password, redirectPath);
         } catch (err) {
             setError(err.response?.data?.message || 'Nie udało się zalogować. Spróbuj ponownie.');
         }
@@ -63,12 +67,6 @@ const Login = () => {
                     <div className="grid gap-2">
                     <div className="flex items-center">
                         <Label htmlFor="password">Hasło</Label>
-                        {/* <a
-                        href="/register"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                        >
-                        Zapomniałeś hasła?
-                        </a> */}
                     </div>
                     <Input 
                         id="password" 

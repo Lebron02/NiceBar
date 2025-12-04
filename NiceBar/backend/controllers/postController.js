@@ -1,8 +1,8 @@
-import Post from "../models/Post.js";
+import * as postService from "../services/postService.js";
 
 export const getPosts = async (req, res) => {
     try {
-        const posts = await Post.find({});
+        const posts = await postService.getAllPosts();
         res.json(posts);
     } catch (error) {
         res.status(500).json({message: "Błąd pobierania przy getPosts" });
@@ -10,9 +10,9 @@ export const getPosts = async (req, res) => {
 }
 
 export const getPostById= async (req, res) => {
-    const {id} = req.params;
     try {
-        const post = await Post.findById(id).populate("comments.author", "firstName lastName");
+        const post = await postService.getPostBySlugOrId(req.params.id)
+        if (!post) return res.status(404).json({ message: "Nie znaleziono posta" });
         res.json(post);
     } catch (error) {
         res.status(500).json({message: "Błąd pobierania przy getPostById" });
@@ -20,13 +20,12 @@ export const getPostById= async (req, res) => {
 }
 
 export const addPost = async (req, res) => {
-    const {title, description} = req.body;
+    const {title, description, images, products}  = req.body;
+    const userId = req.user.userId
     
     try {
-        const post = new Post({ title, description, userId: req.user.userId});
-        await post.save();
-
-        res.status(201).json(post);
+        const newPost = await postService.createPost({title, description, images, products}, userId);
+        res.status(201).json(newPost);
     } catch (error) {
         res.status(500).json({message: "Błąd dodawania przy addPost" });
     }
@@ -34,13 +33,11 @@ export const addPost = async (req, res) => {
 
 export const editPost = async (req, res) => {
     const {id} = req.params;
-    const {title, description} = req.body;
+    const updateData = req.body;
+    const userId = req.user.userId
+
     try {
-        const post = await Post.findOneAndUpdate(
-            { _id: id, userId: req.user.userId },
-            { title, description},
-            { new: true }
-        );
+        const post = await postService.updatePost(id, userId, updateData);
         if(!post){
             return res.status(404).json({message: "Błąd modyfikacji posta"})
         } 
@@ -53,11 +50,10 @@ export const editPost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
     const {id} = req.params;
+    const userId = req.user.userId
     try {
-        const post = await Post.findOneAndDelete(
-            { _id: id, userId: req.user.userId },
-        );
-        if(!post){
+        const post = await postService.deletePost(id, userId);
+    if(!post){
             res.status(404).json({message: "Błąd usuwania posta"})
         } 
         res.json({ message: "Zadanie usunięte" });
@@ -72,11 +68,9 @@ export const addComment= async (req, res) => {
     const userId = req.user.userId;
 
     try {
-        const post = await Post.findByIdAndUpdate(
-            id, { $push : { comments: { author: userId, text: text}}}, {new: true}
-        );
+        const post = await postService.addComment(id, userId, text);
         if(!post){
-            res.status(404).json({message: "Nie znaleziono posta"})
+            return res.status(404).json({message: "Nie znaleziono posta"})
         } 
         res.json({ message: "Komentarz dodany" });
     } catch (error) {
@@ -87,9 +81,7 @@ export const addComment= async (req, res) => {
 export const deleteComment = async (req, res) => {
     const {id, commentId} = req.params;
     try {
-        const post = await Post.findByIdAndUpdate(
-           id, { $pull : { comments: { _id: commentId, author: req.user.userId}}}, {new: true}
-        );
+        const post = await Post.findByIdAndUpdate(id, commentId, userId);
         if(!post){
             res.status(404).json({message: "Błąd usuwania komentarza"})
         } 

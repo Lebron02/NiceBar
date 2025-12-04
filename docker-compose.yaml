@@ -6,13 +6,11 @@ services:
     networks:
       - nicebar_network
     environment:
-      MONGO_URI: mongodb://mongodb:27017/nicebar
+      MONGO_URI: mongodb+srv://szymongrzegorzadamczyk_db_user:lWBvTNTB7cLpE9jT@nicebar.t7hjoll.mongodb.net/nicebar?appName=NiceBar
       SESSION_SECRET: twoj_dlugi_sekretny_klucz
     volumes:
       - ./Nicebar/backend:/app       
       - /app/node_modules
-    depends_on:
-      - mongodb
 
   frontend:
     build: ./Nicebar/frontend
@@ -24,21 +22,8 @@ services:
       VITE_API_URL: http://localhost:5000 
     volumes:
       - ./Nicebar/frontend:/app
-      - /app/node_modules
-
-  mongodb:
-    image: mongo:8.2  
-    ports:
-      - "27017:27017"  
-    networks:
-      - nicebar_network
-    volumes:
-      - mongo-data:/data/db  
+      - /app/node_modules  
 
 networks:
   nicebar_network:
     driver: bridge 
-
-volumes:
-  mongo-data:
-    driver: local  

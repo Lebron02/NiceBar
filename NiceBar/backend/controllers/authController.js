@@ -1,23 +1,12 @@
-import bcrypt from "bcrypt";
-import User from "../models/User.js";
+import * as authService from "../services/authService.js";
 
 export const register = async (req, res) => {
-    const {email, password, firstName, lastName, address} = req.body;
-
     try {
-        const exists = await User.findOne({email});
-
-        if(exists){
-            return res.status(400).json({message: "Użytkownik już istnieje"});
-        }
-
-        const hashed = await bcrypt.hash(password, 10);
-        const user = new User({email, password: hashed, firstName, lastName, address});
-        await user.save();
-
+        const exists = await authService.registerUser(req.body)
         res.status(201).json({message: "Użytkownik zarejstrowany"})
     } catch (error) {
-        res.status(500).json({message: "Błąd serwera przy register"})
+        const status = error.message === "Użytkownik już istnieje" ? 400 : 500;
+        res.status(status).json({ message: error.message });
     }
 }
 
@@ -25,31 +14,19 @@ export const login = async (req, res) => {
     const {email, password} = req.body;
 
     try {
-        const user = await User.findOne({email});
+        const user = await authService.loginUser( email, password );
+        req.session.userId = user._id;
 
-        if(!user){
-            return res.status(400).json({message: "Nieprawidłowy email"});
-        }
-        if(!(await bcrypt.compare(password, user.password))){
-            return res.status(400).json({message: "Nieprawidłowe hasło"});
-        }
+        const userToSend = user.toObject();
+        delete userToSend.password;
 
-        const userToSend = {
-            _id: user._id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            role: user.role,
-            createdAt: user.createdAt
-        };
-
-        const userId = user._id
-        req.session.userId = userId
-    
         res.status(200).json({ message: "Sukces logowania!", user: userToSend})
-        
     } catch (error) {
-        res.status(500).json({message: "Błąd serwera przy login"})
+        console.error("Szczegóły błędu logowania:", error.message);
+        if (error.message === "Nieprawidłowy email" || error.message === "Nieprawidłowe hasło") {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: "Wystąpił błąd serwera podczas logowania" });
     }
 }
 
@@ -70,7 +47,7 @@ export const logout = async (req, res) => {
 export const checkStatus = async (req, res) => {
     try {
         if(req.session.userId){
-            const userData = await User.findById(req.session.userId).select("-password");
+            const userData = await authService.getUserById(req.session.userId);
             res.status(200).json({ isLoggedIn: true, user: userData})
         } else {
             res.status(401).json({ isLoggedIn: false})
@@ -82,61 +59,26 @@ export const checkStatus = async (req, res) => {
 
 export const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    
-    if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Wszystkie pola są wymagane" });
-    }
+    const userId = req.session.userId;
 
     try {
-        const user = await User.findById(req.session.userId);
-
-        if (!user) {
-            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
-        }
-
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Obecne hasło jest nieprawidłowe" });
-        }
-
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-        user.password = hashedNewPassword;
-        await user.save();
-
+        const user = await authService.changeUserPassword(userId, currentPassword, newPassword )
         res.status(200).json({ message: "Hasło zostało zmienione pomyślnie" });
-
     } catch (error) {
-        console.error("Błąd zmiany hasła:", error);
-        res.status(500).json({ message: "Błąd serwera przy zmianie hasła" });
+        const status = (error.message === "Obecne hasło jest nieprawidłowe") ? 400 : 500;
+        res.status(status).json({ message: error.message });
     }
     };
 
 export const updateAddress = async (req, res) => {
-    const { streetName, streetNumber, city, postalCode } = req.body;
-
     try {
-        const user = await User.findById(req.session.userId).select("-password");
+        const user = await authService.updateUserAddress(req.session.userId, req.body)
 
-        if (!user) {
-            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
-        }
+        const userToSend = user.toObject();
+        delete userToSend.password;
 
-        user.address = {
-            streetName,
-            streetNumber,
-            city,
-            postalCode
-        };
-        await user.save();
-
-        res.status(200).json({ 
-            message: "Adres zaktualizowany", 
-            user: user 
-        });
-
+        res.status(200).json({ message: "Adres zaktualizowany", user: userToSend });
     } catch (error) {
-        console.error("Błąd zmiany adresu:", error);
         res.status(500).json({ message: "Błąd serwera przy zmianie adresu" });
     }
 };
@@ -153,21 +95,11 @@ export const promoteToAdmin = async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.session.userId);
-
-        if (!user) {
-            return res.status(404).json({ message: "Użytkownik nie znaleziony" });
-        }
-
-        user.role = 'admin';
-        await user.save();
-
-        const userToSend = user.toObject();
-        delete userToSend.password;
+        const updatedUser = await authService.promoteUserToAdmin(req.session.userId);
 
         res.status(200).json({ 
             message: "Gratulacje! Zostałeś adminem.", 
-            user: userToSend 
+            user: updatedUser 
         });
 
     } catch (error) {

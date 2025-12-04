@@ -7,6 +7,7 @@ const API_URL = "http://localhost:5000/api";
 const api = axios.create({
     baseURL: API_URL,
     withCredentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 });
 
 const AuthContext = createContext(null);
@@ -33,13 +34,14 @@ export const AuthProvider = ({ children }) => {
         verifyAuth();
     }, []);
         
-    const login = async (email, password) => {
+    const login = async (email, password, redirectPath = '/') => {
         setLoading(true);
         try {
             const res = await api.post(`/auth/login`, { email, password });
             setIsLoggedIn(true);
-            setUser(res.data.user)
-            navigate('/'); 
+            setUser(res.data.user);
+            
+            navigate(redirectPath); 
         } catch (error) {
             console.error("Błąd logowania:", error.response?.data?.message);
             throw error; 
@@ -61,10 +63,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const addPost = async (title, description) => {
+    const addPost = async (title, description, slug, image) => {
         setLoading(true);
         try {
-            await api.post(`/posts/`, {title, description});
+            await api.post(`/posts/`, { title, description, slug, image });
             navigate('/'); 
         } catch (error) {
             console.error("Błąd dodawania posta:", error.response?.data?.message);

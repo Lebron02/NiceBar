@@ -78,7 +78,6 @@ const Register = () => {
                 <CardContent>
                     <form onSubmit={handleSubmit} id='registration-form'>
                     <div className="flex flex-col gap-6">
-                        {/* --- Dane Podstawowe --- */}
                         <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -114,7 +113,6 @@ const Register = () => {
                         />
                         </div>
 
-                        {/* --- Adres --- */}
                         <div className="grid gap-2">
                         <Label htmlFor="streetName">Ulica</Label>
                         <Input 
@@ -160,7 +158,6 @@ const Register = () => {
                         />
                         </div>  
 
-                        {/* --- Hasło --- */}
                         <div className="grid gap-2">
                         <Label htmlFor="password">Hasło</Label>
                         <Input 

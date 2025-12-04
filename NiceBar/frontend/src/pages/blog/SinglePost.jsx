@@ -1,168 +1,226 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
+import { getImageUrl } from '../../services/config'; 
+import CommentsSection from "./CommentSection";
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-
-import CommentsSection from "./CommentSection";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const SinglePost = () => {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false)
+    
+    const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [slugField, setSlugField] = useState(''); 
+    const [image, setImage] = useState('');
+    const [uploading, setUploading] = useState(false);
 
-    const {api, updatePost} = useAuth();
-    const {id} = useParams();
-
-    const goBack = useNavigate()
-
+    const { api, updatePost, user } = useAuth(); 
+    const { slug } = useParams();
+    const goBack = useNavigate();
 
     const fetchPost = useCallback(async () => {
         try {
             setLoading(true);
-            setError(null);
-            const response = await api.get(`/posts/${id}`);
-            setPost(response.data)
-            setTitle(response.data.title)
-            setDescription(response.data.description)
+            const response = await api.get(`/posts/${slug}`);
+            setPost(response.data);
+            
+            setTitle(response.data.title);
+            setDescription(response.data.description);
+            setSlugField(response.data.slug);
+            setImage(response.data.images);
         } catch (err) {
-            setError("Nie udało się pobrać posta")
+            setError("Nie udało się pobrać posta");
             console.error(err);
         } finally {
             setLoading(false);
-        };
-    }, [id, api]);
-
+        }
+    }, [slug, api]);
 
     useEffect(() => {
         fetchPost();
     }, [fetchPost]);
 
-    
-    if (loading) {
-        return <div>Ładowanie postów...</div>;
-    }
+    const uploadFileHandler = async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+        setUploading(true);
 
-    if (error) {
-        return <div style={{ color: 'red' }}>{error}</div>;
-    }
+        try {
+            const { data } = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+            setImage(data); 
+            setUploading(false);
+        } catch (error) {
+            console.error(error);
+            setUploading(false);
+            alert('Błąd uploadu');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(''); 
         try {
-            await updatePost(title, description, id);
-            await fetchPost();
+            await updatePost(post._id, { title, description, slug: slugField, image });
+            
             setIsEditing(false);
+            if (slugField !== slug) {
+                goBack(`/blog/${slugField}`);
+            } else {
+                await fetchPost();
+            }
         } catch (err) {
-            setError(err.response?.data?.message || 'Nie udało się zaktualizować posta. Spróbuj ponownie.');
+            setError(err.response?.data?.message || 'Nie udało się zaktualizować posta.');
         }
     };
 
-    const deletePost = async () => {
+    const deletePostHandler = async () => {
+        if(!window.confirm("Czy na pewno chcesz usunąć ten post?")) return;
         try {
-            setLoading(true);
-            setError(null);
-            const response = await api.delete(`/posts/${id}`);
-            console.log(response);
+            await api.delete(`/posts/${post._id}`);
             goBack("/");
         } catch (err) {
-            setError("Nie udało się usunąć posta")
-            console.error(err);
-        } finally {
-            setLoading(false);
-        };
-    }
+            alert("Nie udało się usunąć posta");
+        }
+    };
+
+    if (loading) return <div>Ładowanie...</div>;
+    if (error) return <div style={{ color: 'red' }}>{error}</div>;
+    if (!post) return <p>Post nie istnieje</p>;
 
     return (
-        <div className="w-auto p-6 flex justify-center">
-            { !post ? (
-                <p>Nie załadowano posta</p>
-            ) : (
-            <div className=''>
-                <Button className='bg-blue-500 mr-1' onClick={setIsEditing}>Edytuj post</Button>
-                <Button className='bg-red-400 mb-3' onClick={deletePost}>Usuń post</Button>
-                <div className='relative overflow-hidden rounded-lg shadow-sm transition hover:shadow-lg w-[80vw]'>
-                    <img alt="" src="https://images.unsplash.com/photo-1661956602116-aa6865609028?auto=format&amp;fit=crop&amp;q=80&amp;w=1160" className="absolute inset-0 h-full w-full object-cover"/>
-                    <div className="relative bg-linear-to-t from-gray-900/50 to-gray-900/25 pt-32 sm:pt-48 lg:pt-64">
-                    <div className="p-4 sm:p-6 bg-white">
-
-                    <time dateTime={post.createdAt} className="block text-xs text-gray-500">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                    </time>
-                    <h3 className="lg:text-4xl font-bold mb-6">{post.title}</h3>
-                    <p className="mt-2 line-clamp-15 lg:text-2xl sm:text-0.7 text-gray-500">{post.description}</p>
-                    </div>
-                    <div className="sm:p-6 bg-white">
-                        <CommentsSection 
-                            postId={post._id}
-                            comments={post.comments || []}
-                            onCommentAdded={fetchPost}
-                        />
-                    </div>
+        <div className="container mx-auto p-6 flex justify-center">
+            <div className='w-full max-w-4xl'>
+                <div className="mb-4">
+                    <Button className='bg-blue-500 mr-2' onClick={() => setIsEditing(!isEditing)}>
+                        {isEditing ? 'Anuluj edycję' : 'Edytuj post'}
+                    </Button>
+                    <Button variant="destructive" onClick={deletePostHandler}>Usuń post</Button>
                 </div>
-            </div>
 
-            {isEditing && (
-                <div className='w-full mt-5 justify-center flex items-center'>
-                    <Card className="w-full max-w">
-                    <CardHeader>
-                        <CardTitle>Edytuj post</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} id='edit-post-form'>
-                        <div className="flex flex-col gap-6">
-                            <div className="grid gap-2 w-100">
-                            <Label htmlFor="title">Tytuł</Label>
-                            <Input
-                                id="title"
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                            />
+                
+                {!isEditing ? (
+                    <div className='overflow-hidden rounded-lg shadow-lg bg-white'>
+                        <div className="w-full flex justify-center">
+                            {post.images && post.images.length > 0 ? (
+                                <Carousel className="w-full max-w-lg">
+                                    <CarouselContent>
+                                        {post.images.map((img, index) => (
+                                            <CarouselItem key={index}>
+                                                <div className="p-1">
+                                                    <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl border bg-white shadow-sm">
+                                                        <img 
+                                                            src={getImageUrl(img)} 
+                                                            alt={`${post.name} - zdjęcie ${index + 1}`} 
+                                                            className="w-full h-full object-contain p-2" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </CarouselItem>
+                                        ))}
+                                    </CarouselContent>
+                                    
+                                    {post.images.length > 1 && (
+                                        <>
+                                            <CarouselPrevious className="left-2" />
+                                            <CarouselNext className="right-2" />
+                                        </>
+                                    )}
+                                </Carousel>
+                            ) : (
+                                <div className="aspect-square w-full max-w-lg bg-gray-100 flex items-center justify-center rounded-xl text-gray-400">
+                                    Brak zdjęć produktu
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="p-8">
+                            <div className="flex justify-between items-center text-gray-500 text-sm mb-4">
+                                <time>{new Date(post.createdAt).toLocaleDateString()}</time>
+                                <span>Autor: {post.userId?.firstName} {post.userId?.lastName}</span>
                             </div>
-                            <div className="grid gap-2 h-40">
-                            <div className="flex items-center">
-                                <Label htmlFor="description">Treść</Label>
-                            </div>
-                            <Textarea 
-                                id="description" 
-                                type="text" 
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                required 
-                            />
+                            
+                            <h1 className="text-4xl font-bold mb-6 text-gray-900">{post.title}</h1>
+                            
+                            <div className="prose max-w-none text-gray-700 text-lg leading-relaxed whitespace-pre-line">
+                                {post.description}
                             </div>
                         </div>
-                        </form>
-                    </CardContent>
-                    <CardFooter className="flex-col gap-2">
-                        <Button type="submit" form='edit-post-form' className="w-50">
-                        Edytuj post
-                        </Button>
-                    </CardFooter>
-                    </Card>
-                </div>
-            )}
+
+                        <div className="bg-gray-50 p-8 border-t">
+                            <CommentsSection 
+                                postId={post._id}
+                                comments={post.comments || []}
+                                onCommentAdded={fetchPost}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className='w-full mt-5'>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Edytuj post</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmit} id='edit-post-form' className="space-y-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="title">Tytuł</Label>
+                                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                                    </div>
+                                    
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="slug">Slug (URL)</Label>
+                                        <Input id="slug" value={slugField} onChange={(e) => setSlugField(e.target.value)} required />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label>Zdjęcie</Label>
+                                        <Input value={image} onChange={(e) => setImage(e.target.value)} placeholder="/uploads/..." />
+                                        <Input type="file" onChange={uploadFileHandler} disabled={uploading} />
+                                        {uploading && <p className="text-sm">Wysyłanie...</p>}
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="description">Treść</Label>
+                                        <Textarea 
+                                            id="description" 
+                                            className="min-h-[200px]"
+                                            value={description} 
+                                            onChange={(e) => setDescription(e.target.value)} 
+                                            required 
+                                        />
+                                    </div>
+                                </form>
+                            </CardContent>
+                            <CardFooter>
+                                <Button type="submit" form='edit-post-form' className="w-full">
+                                    Zapisz zmiany
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                )}
             </div>
-            )}
         </div>
     )
 }
+
 export default SinglePost;

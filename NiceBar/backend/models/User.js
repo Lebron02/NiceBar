@@ -6,39 +6,18 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    firstName:{
-        type: String,
-        required: true,
-    },
-    lastName:{
-        type: String,
-        required: true,
-    },
+    firstName:{ type: String, required: true },
+    lastName: { type: String, required: true },
     address: {
-        streetName: {
-            type: String,
-            required: true,
-        },
-        streetNumber: {
-            type: String,
-            required: true,
-        },
-        city: {
-            type: String,
-            required: true,
-        },
-        postalCode: {
-            type: String,
-            required: true,
-        }
+        streetName: { type: String },
+        streetNumber: { type: String },
+        city: { type: String },
+        postalCode: { type: String}
     },
-    password:{
-            type: String,
-            required: true,
-    },
-    role:{
-        type: String,
-        enum: ['user', 'admin'],
+    password:{ type: String, required: true },
+    role:{ 
+        type: String, 
+        enum: ['user', 'admin'], 
         default: 'user', 
     }
 }, { timestamps: true });
