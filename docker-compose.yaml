@@ -6,8 +6,11 @@ services:
     networks:
       - nicebar_network
     environment:
-      MONGO_URI: mongodb+srv://szymongrzegorzadamczyk_db_user:lWBvTNTB7cLpE9jT@nicebar.t7hjoll.mongodb.net/nicebar?appName=NiceBar
-      SESSION_SECRET: twoj_dlugi_sekretny_klucz
+    - MONGO_URI=${MONGO_URI}
+    - SESSION_SECRET=${SESSION_SECRET}
+    - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
+    - PORT=${PORT}
     volumes:
       - ./Nicebar/backend:/app       
       - /app/node_modules
