@@ -3,10 +3,16 @@ import { AuthProvider } from './services/AuthContext';
 import { ShopProvider } from './services/ShopContext';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 import Login from './pages/login/Login'
 import Register from './pages/register/Register';
-import User from './pages/user/User'
+
+import UserAddress from './pages/user/UserAddress';
+import UserDashboard from './pages/user/UserDashboard';
+import UserLayout from './pages/user/UserLayout';
+import UserOrders from './pages/user/UserOrders';
+import UserSettings from './pages/user/UserSettings';
 
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -31,32 +37,44 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ShopProvider>
-          <Navbar/>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products/:slug" element={<SingleProduct />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/place-order" element={<PlaceOrder />} />
-            <Route path="/payment" element={<Payment />} />
+            
+            <div className="flex flex-col min-h-screen"> 
+
+              <Navbar />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/products/:slug" element={<SingleProduct />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/place-order" element={<PlaceOrder />} />
+                  <Route path="/payment" element={<Payment />} />
 
 
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/add-post" element={<AddPost />} />
-            <Route path="/blog/:slug" element={<SinglePost />} />
-            
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            <Route path="/account" element={<User />} />
-            
-            <Route element={<AdminRoute />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/product/create" element={<ProductEdit />} />
-              <Route path="/admin/product/:id/edit" element={<ProductEdit />} />
-            </Route>
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/add-post" element={<AddPost />} />
+                  <Route path="/blog/:slug" element={<SinglePost />} />
+                  
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  
+                  <Route path="/account" element={<UserLayout />}>
+                      <Route index element={<UserDashboard />} />      
+                      <Route path="orders" element={<UserOrders />} />   
+                      <Route path="address" element={<UserAddress />} /> 
+                      <Route path="settings" element={<UserSettings />} />
+                  </Route>
+                  
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/product/create" element={<ProductEdit />} />
+                    <Route path="/admin/product/:id/edit" element={<ProductEdit />} />
+                  </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              <Footer /> 
+           </div>
         </ShopProvider>
       </AuthProvider>
     </BrowserRouter>

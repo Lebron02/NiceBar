@@ -18,7 +18,7 @@ const PlaceOrder = () => {
         address: user?.address?.streetName ? `${user.address.streetName} ${user.address.streetNumber}` : '',
         city: user?.address?.city || '',
         postalCode: user?.address?.postalCode || '',
-        country: 'Polska' // Domyślnie
+        country: 'Polska' 
     });
 
     const handleChange = (e) => {

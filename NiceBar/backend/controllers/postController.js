@@ -79,14 +79,33 @@ export const addComment= async (req, res) => {
 }
 
 export const deleteComment = async (req, res) => {
-    const {id, commentId} = req.params;
+    const { id, commentId } = req.params;
+    const userId = req.user.userId; 
+
     try {
-        const post = await Post.findByIdAndUpdate(id, commentId, userId);
+        const post = await postService.deleteComment(id, commentId, userId);
+        
         if(!post){
-            res.status(404).json({message: "Błąd usuwania komentarza"})
+            return res.status(404).json({message: "Błąd usuwania komentarza lub brak uprawnień"});
         } 
         res.json({ message: "Komentarz usunięty" });
     } catch (error) {
         res.status(500).json({message: "Błąd usuwania przy deleteComment" });
     }
 }
+
+export const getAiSuggestions = async (req, res) => {
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+        return res.status(400).json({ message: "Tytuł i treść są wymagane do analizy." });
+    }
+
+    try {
+        const suggestions = await postService.getAiProductSuggestions(title, content);
+        res.json({ suggestedProductIds: suggestions });
+    } catch (error) {
+        console.error("AI Error:", error);
+        res.status(500).json({ message: "Błąd generowania sugestii AI" });
+    }
+};

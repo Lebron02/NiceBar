@@ -10,6 +10,7 @@ services:
     - SESSION_SECRET=${SESSION_SECRET}
     - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
     - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
+    - GEMINI_API_KEY=${GEMINI_API_KEY}
     - PORT=${PORT}
     volumes:
       - ./Nicebar/backend:/app       

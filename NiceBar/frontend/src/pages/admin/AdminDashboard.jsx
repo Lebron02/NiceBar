@@ -56,13 +56,13 @@ const AdminProducts = () => {
                             <TableHead>Nazwa</TableHead>
                             <TableHead>Cena</TableHead>
                             <TableHead>Kategoria</TableHead>
-                            <TableHead className="text-right">Akcje</TableHead>
+                            <TableHead className="text-right pr-15">Akcje</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {products.map((product) => (
                             <TableRow key={product._id}>
-                                <TableCell className="font-mono text-xs">{product._id.substring(20, 24)}...</TableCell>
+                                <TableCell className="text-xs">{product._id}</TableCell>
                                 <TableCell>{product.name}</TableCell>
                                 <TableCell>{product.price} PLN</TableCell>
                                 <TableCell>{product.category?.name || '-'}</TableCell>

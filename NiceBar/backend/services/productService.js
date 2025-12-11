@@ -1,4 +1,6 @@
 import Product from "../models/Product.js";
+import Post from "../models/Post.js"; // Import modelu Post
+import * as aiService from "./aiService.js"; // Import serwisu AI
 import Category from "../models/Category.js"; 
 import slugify from "slugify";
 
@@ -15,6 +17,21 @@ const handleCategory = async (categoryName) => {
     return category._id;
 };
 
+export const getAllCategories = async () => {
+    return await Category.find({}).sort({ name: 1 });
+};
+
+export const suggestPostsForProduct = async (name, description) => {
+    //Pobieranie wszystkich postów (potrzebne jako kontekst dla AI)
+    const allPosts = await Post.find({}, 'title description _id');
+
+    if (allPosts.length === 0) return [];
+
+    const suggestedIds = await aiService.suggestPostsForProduct(name, description, allPosts);
+    
+    return suggestedIds;
+};
+
 export const getAllProducts = async (keyword = '') => {
     // Można tu dodać wyszukiwanie po nazwie w przyszłości
     // const query = keyword ? { name: { $regex: keyword, $options: 'i' } } : {};
@@ -25,9 +42,9 @@ export const getProductBySlugOrId = async (identifier) => {
     const isObjectId = identifier.match(/^[0-9a-fA-F]{24}$/);
 
     if (isObjectId) {
-        return await Product.findById(identifier).populate("category");
+        return await Product.findById(identifier).populate("category").populate('relatedPosts');;
     } else {
-        return await Product.findOne({ slug: identifier }).populate("category");
+        return await Product.findOne({ slug: identifier }).populate("category").populate('relatedPosts');;
     }
 };
 

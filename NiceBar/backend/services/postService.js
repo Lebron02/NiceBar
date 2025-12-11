@@ -1,4 +1,7 @@
 import Post from "../models/Post.js";
+import Product from "../models/Product.js"; // Potrzebne do AI
+import * as aiService from "./aiService.js";
+
 import slugify from "slugify";
 
 export const createPost = async (postData, userId) => {
@@ -30,12 +33,12 @@ export const getPostBySlugOrId = async (identifier) => {
         return await Post.findById(identifier)
         .populate("userId", "firstName lastName")
         .populate("comments.author", "firstName lastName")
-        .populate("products");
+        .populate("products")
     } else {
         return await Post.findOne({ slug: identifier })
         .populate("userId", "firstName lastName")
         .populate("comments.author", "firstName lastName")
-        .populate("products");
+        .populate("products")
     }
 };
 
@@ -76,4 +79,14 @@ export const deleteComment = async (id, commentId, userId) => {
         },
         { new: true }
     )
+};
+
+export const getAiProductSuggestions = async (title, content) => {
+    const allProducts = await Product.find({}, 'name category _id brand');
+    
+    if (!allProducts.length) return [];
+
+    const suggestedIds = await aiService.suggestProductsForPost(title, content, allProducts);
+
+    return suggestedIds;
 };

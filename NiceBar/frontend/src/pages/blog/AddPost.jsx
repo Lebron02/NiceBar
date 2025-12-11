@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { getImageUrl } from '../../services/config'; 
+import AiProductSuggester from '../../components/AiProductSuggester'; 
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+
+
 
 const AddPost = () => {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
+    const [loading, setLoading] = useState(false); 
     const [uploading, setUploading] = useState(false);
+    
+    const [availableProducts, setAvailableProducts] = useState([]); 
+    const [selectedProducts, setSelectedProducts] = useState([]); 
+    
     const { api } = useAuth();
     const navigate = useNavigate();
 
@@ -33,11 +30,28 @@ const AddPost = () => {
             images: [],
     });
 
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const { data } = await api.get('/products');
+                setAvailableProducts(data);
+            } catch (error) {
+                console.error("Błąd pobierania produktów", error);
+            }
+        };
+        fetchProducts();
+    }, [api]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/posts', formData);
+            const postData = {
+                ...formData,
+                products: selectedProducts 
+            };
+
+            await api.post('/posts', postData);
             navigate('/blog');
         } catch (error) {
             console.error(error);
@@ -74,7 +88,6 @@ const AddPost = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true, 
             };
-
             const { data: newImages } = await api.post('/upload', uploadData, config);
 
             setFormData(prev => ({
@@ -91,8 +104,8 @@ const AddPost = () => {
     };
 
     return (
-        <div className='w-full h-screen justify-center flex items-center'>
-            <Card className="w-full max-w-sm">
+        <div className='w-full justify-center flex py-10'>
+            <Card className="w-full max-w-lg">
             <CardHeader>
                 <CardTitle>Stwórz post</CardTitle>
             </CardHeader>
@@ -104,7 +117,7 @@ const AddPost = () => {
                         <Input name="title" value={formData.title} onChange={handleChange} required />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Opis</Label>
+                        <Label>Opis (Treść)</Label>
                         <Textarea 
                             name="description" 
                             value={formData.description} 
@@ -118,7 +131,15 @@ const AddPost = () => {
                         <Label>Slug (URL)</Label>
                         <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" />
                     </div>
-                    {/* --- SEKCJA ZDJĘĆ --- */}
+                    
+                    <AiProductSuggester 
+                        title={formData.title}
+                        description={formData.description}
+                        availableProducts={availableProducts}
+                        selectedProducts={selectedProducts}
+                        onSelectionChange={setSelectedProducts}
+                    />
+
                         <div className="grid gap-2">
                             <Label>Zdjęcia</Label>
                             <Input 
@@ -152,13 +173,12 @@ const AddPost = () => {
                 </form>
             </CardContent>
             <CardFooter className="flex-col gap-2">
-                <Button type="submit" form='add-post-form' className="w-full">
-                Dodaj post
+                <Button type="submit" form='add-post-form' className="w-full" disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Dodaj post'}
                 </Button>
             </CardFooter>
             </Card>
         </div>
-        
     )
 }
 

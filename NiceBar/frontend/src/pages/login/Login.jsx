@@ -38,7 +38,7 @@ const Login = () => {
     };
 
     return (
-        <div className='w-full h-screen justify-center flex items-center'>
+        <div className='flex min-h-screen w-full items-center justify-center px-4'>
         <Card className="w-full max-w-sm">
             <CardHeader>
                 <CardTitle>Zaloguj się</CardTitle>

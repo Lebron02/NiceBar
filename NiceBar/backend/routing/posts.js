@@ -1,5 +1,5 @@
 import express from 'express';
-import { getPosts, getPostById, addPost, editPost, deletePost, addComment, deleteComment } from '../controllers/postController.js';
+import { getPosts, getPostById, addPost, editPost, deletePost, addComment, deleteComment, getAiSuggestions } from '../controllers/postController.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.delete("/:id", auth, deletePost);
 router.post("/:id/comments", auth, addComment);
 router.delete("/:id/comments/:commentId", auth, deleteComment);
 
+router.post('/suggest-products', auth, getAiSuggestions);
 
 export default router;

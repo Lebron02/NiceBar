@@ -38,7 +38,7 @@ const CartPage = () => {
             <h1 className="text-3xl font-bold mb-6">Koszyk Zakupowy</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Tabela Produktów */}
+
                 <div className="md:col-span-2">
                     <div className="rounded-md border">
                         <Table>
@@ -68,7 +68,6 @@ const CartPage = () => {
                                         </TableCell>
                                         <TableCell>{item.product.price} PLN</TableCell>
                                         <TableCell>
-                                            {/* Prosty select do zmiany ilości */}
                                             <select 
                                                 className="border rounded p-1"
                                                 value={item.qty}
@@ -97,7 +96,6 @@ const CartPage = () => {
                     </div>
                 </div>
 
-                {/* Podsumowanie */}
                 <div className="md:col-span-1">
                     <div className="border rounded-lg p-6 bg-gray-50">
                         <h2 className="text-xl font-semibold mb-4">Podsumowanie</h2>

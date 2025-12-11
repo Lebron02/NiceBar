@@ -8,14 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from "lucide-react";
+import AiPostSuggester from "./../../components/AiPostSuggester"; 
 
 const ProductEdit = () => {
     const { id } = useParams(); 
     const navigate = useNavigate();
     const { api } = useAuth();
+    
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    //const [categories, setCategories] = useState([]); 
+    
+    const [categories, setCategories] = useState([]); 
+    const [availablePosts, setAvailablePosts] = useState([]);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -26,6 +30,7 @@ const ProductEdit = () => {
         category: '',
         countInStock: 0,
         description: '',
+        relatedPosts: [] 
     });
 
     const isEditMode = !!id; 
@@ -33,21 +38,32 @@ const ProductEdit = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Pobieranie listy kategorii, do zaimplementowania w przyszłości
-                // const catRes = await api.get('/products/categories');
-                // setCategories(catRes.data);
+                const [categoriesRes, postsRes] = await Promise.all([
+                    api.get('/products/categories'),
+                    api.get('/posts')
+                ]);
+
+                setCategories(categoriesRes.data);
+                setAvailablePosts(postsRes.data);
 
                 if (isEditMode) {
                     const { data } = await api.get(`/products/${id}`);
-                    const preparedData = {
+                    
+                    const categoryValue = data.category?.name || data.category || '';
+
+                    const relatedPostsIds = data.relatedPosts 
+                        ? data.relatedPosts.map(p => (typeof p === 'object' ? p._id : p))
+                        : [];
+
+                    setFormData({
                         ...data,
-                        category: data.category?.name || '',
-                        images: data.images || []
-                    };
-                    setFormData(preparedData);
+                        category: categoryValue,
+                        images: data.images || [],
+                        relatedPosts: relatedPostsIds
+                    });
                 }
             } catch (error) {
-                console.error("Błąd pobierania danych", error);
+                console.error("Błąd pobierania danych:", error);
             }
         };
         fetchData();
@@ -55,6 +71,10 @@ const ProductEdit = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleRelatedPostsChange = (newSelectedIds) => {
+        setFormData(prev => ({ ...prev, relatedPosts: newSelectedIds }));
     };
 
     const removeImage = (indexToRemove) => {
@@ -92,20 +112,17 @@ const ProductEdit = () => {
         }
 
         setUploading(true);
-
         try {
             const config = {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true, 
             };
-
             const { data: newImages } = await api.post('/upload', uploadData, config);
 
             setFormData(prev => ({
                 ...prev,
                 images: [...prev.images, ...newImages]
             }));
-            
             setUploading(false);
         } catch (error) {
             console.error(error);
@@ -116,30 +133,84 @@ const ProductEdit = () => {
 
     return (
         <div className="flex justify-center p-6">
-            <Card className="w-full max-w-lg">
+            <Card className="w-full max-w-2xl">
                 <CardHeader>
                     <CardTitle>{isEditMode ? 'Edytuj Produkt' : 'Dodaj Produkt'}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        
-                        <div className="grid gap-2">
-                            <Label>Nazwa</Label>
-                            <Input name="name" value={formData.name} onChange={handleChange} required />
+                    <form onSubmit={handleSubmit} className="space-y-6">
+
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label>Nazwa</Label>
+                                <Input name="name" value={formData.name} onChange={handleChange} required />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Slug (URL)</Label>
+                                <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>Cena</Label>
+                                    <Input type="number" name="price" value={formData.price} onChange={handleChange} required />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Ilość w magazynie</Label>
+                                    <Input type="number" name="countInStock" value={formData.countInStock} onChange={handleChange} required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label>Kategoria</Label>
+                                <Input 
+                                    name="category" 
+                                    value={formData.category} 
+                                    onChange={handleChange} 
+                                    list="categories-list"
+                                    placeholder="Wybierz lub wpisz nową"
+                                    required 
+                                    autoComplete="off"
+                                />
+                                <datalist id="categories-list">
+                                    {categories.map((cat) => (
+                                        <option key={cat._id} value={cat.name} />
+                                    ))}
+                                </datalist>
+                                <p className="text-[10px] text-gray-500">Wybierz z listy lub wpisz, aby utworzyć nową.</p>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Marka</Label>
+                                <Input name="brand" value={formData.brand} onChange={handleChange} required />
+                            </div>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>Slug (URL)</Label>
-                            <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" />
+                            <Label>Opis</Label>
+                            <Textarea 
+                                name="description" 
+                                value={formData.description} 
+                                onChange={handleChange} 
+                                className="min-h-[150px]"
+                                required 
+                            />
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label>Cena</Label>
-                            <Input type="number" name="price" value={formData.price} onChange={handleChange} required />
+                        <div className="pt-2">
+                            <AiPostSuggester 
+                                productName={formData.name}
+                                description={formData.description}
+                                availablePosts={availablePosts}
+                                selectedPosts={formData.relatedPosts}
+                                onSelectionChange={handleRelatedPostsChange}
+                            />
                         </div>
 
-                        {/* --- SEKCJA ZDJĘĆ --- */}
-                        <div className="grid gap-2">
+                        <div className="grid gap-2 border-t pt-4">
                             <Label>Zdjęcia</Label>
                             <Input 
                                 type="file" 
@@ -149,7 +220,7 @@ const ProductEdit = () => {
                             />
                             {uploading && <p className="text-sm text-gray-500">Wysyłanie...</p>}
 
-                            <div className="grid grid-cols-3 gap-2 mt-2">
+                            <div className="grid grid-cols-4 gap-2 mt-2">
                                 {formData.images.map((img, index) => (
                                     <div key={index} className="relative group border rounded overflow-hidden aspect-square">
                                         <img 
@@ -167,45 +238,6 @@ const ProductEdit = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label>Marka</Label>
-                            <Input name="brand" value={formData.brand} onChange={handleChange} required />
-                        </div>
-
-                        {/* Kategoria z podpowiedziami */}
-                        <div className="grid gap-2">
-                            <Label>Kategoria</Label>
-                            <Input 
-                                name="category" 
-                                value={formData.category} 
-                                onChange={handleChange} 
-                                list="categories-list"
-                                placeholder="Wybierz lub wpisz nową"
-                                required 
-                            />
-                            {/* <datalist id="categories-list">
-                                {categories.map((cat) => (
-                                    <option key={cat._id} value={cat.name} />
-                                ))}
-                            </datalist> */}
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label>Ilość w magazynie</Label>
-                            <Input type="number" name="countInStock" value={formData.countInStock} onChange={handleChange} required />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label>Opis</Label>
-                            <Textarea 
-                                name="description" 
-                                value={formData.description} 
-                                onChange={handleChange} 
-                                className="min-h-[150px]"
-                                required 
-                            />
                         </div>
 
                         <Button type="submit" className="w-full" disabled={loading}>
