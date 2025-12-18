@@ -6,6 +6,7 @@ import { useAuth } from "../../services/AuthContext";
 import { useShop } from "../../services/ShopContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Lock } from "lucide-react";
 
 const stripePromise = loadStripe("pk_test_51SaLzIGxlBSq9jXCnf5BpZwAvFbHBIrHdPsOExtYwvc1wYS4LraUr29Ag3I7JYU40AtQkLbGYMcD12TJO7dZJLYJ00NA9MCwUA");
 
@@ -26,7 +27,6 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
 
     setIsProcessing(true);
 
-    
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -39,7 +39,6 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
       setMessage(error.message);
       setIsProcessing(false);
     } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      
       try {
         await api.post("/orders/payment/confirm", {
           orderId,
@@ -60,15 +59,28 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <div className="bg-slate-950 p-4 rounded-lg border border-slate-700">
+        <PaymentElement options={{
+            theme: 'night',
+            variables: {
+                colorPrimary: '#3b82f6',
+                colorBackground: '#020617',
+                colorText: '#cbd5e1',
+                colorDanger: '#ef4444',
+                fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                spacingUnit: '4px',
+                borderRadius: '8px',
+            },
+        }} />
+      </div>
       
-      {message && <div className="text-red-500 text-sm">{message}</div>}
+      {message && <div className="text-red-500 text-sm bg-red-500/10 p-3 rounded border border-red-500/20">{message}</div>}
       
       <Button 
         disabled={isProcessing || !stripe || !elements} 
-        className="w-full mt-4"
+        className="w-full bg-white text-slate-950 hover:bg-slate-300 font-bold py-6"
       >
-        {isProcessing ? "Przetwarzanie..." : "Zapłać teraz"}
+        {isProcessing ? "Przetwarzanie..." : "Zapłać teraz bezpiecznie"}
       </Button>
     </form>
   );
@@ -101,21 +113,28 @@ const PaymentPage = () => {
     }
   }, [orderId, api]);
 
-  if (!orderId) return <div>Błąd: Brak numeru zamówienia.</div>;
+  if (!orderId) return <div className="min-h-screen bg-slate-950 text-red-500 flex items-center justify-center">Błąd: Brak numeru zamówienia.</div>;
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh] p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Płatność bezpieczna</CardTitle>
+    <div className="min-h-screen bg-slate-950 text-slate-300 py-16 flex justify-center items-center px-4">
+      <Card className="w-full max-w-md bg-slate-900 border-slate-800 shadow-xl">
+        <CardHeader className="text-center border-b border-slate-800 pb-6">
+          <div className="mx-auto bg-slate-800 p-3 rounded-full w-fit mb-4">
+            <Lock className="text-green-500" size={24} />
+          </div>
+          <CardTitle className="text-white text-2xl">Bezpieczna płatność</CardTitle>
+          <p className="text-slate-400 text-sm mt-2">Dokończ swoje zamówienie</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {clientSecret ? (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements stripe={stripePromise} options={{ 
+                clientSecret, 
+                appearance: { theme: 'night', labels: 'floating' } 
+            }}>
               <CheckoutForm orderId={orderId} clientSecret={clientSecret} />
             </Elements>
           ) : (
-            <div>Ładowanie bramki płatności...</div>
+            <div className="text-center text-slate-400 py-10">Ładowanie bramki płatności...</div>
           )}
         </CardContent>
       </Card>

@@ -46,10 +46,10 @@ export const updateOrderDeliveryStatus = async (orderId, status) => {
         throw new Error("Zamówienie nie istnieje");
     }
 
-    // order.deliveryStatus = status;
-    // if (status === 'Delivered') {
-    //     order.deliveredAt = Date.now();
-    // }
+    order.deliveryStatus = status;
+    if (status === 'Delivered') {
+        order.deliveredAt = Date.now();
+    }
 
     return await order.save();
 };

@@ -15,21 +15,25 @@ import uploadRoutes from './routing/upload.js';
 dotenv.config()
 
 const app = express();
+
+// Konfiguracja CORS
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
-    
 }));
 
 app.use(express.json());
+
+// Konfiguracja Sesji
 app.use(session({
     secret: process.env.SESSION_SECRET, 
     resave: false, 
     saveUninitialized: false, 
     store: MongoStore.create({mongoUrl: process.env.MONGO_URI}), 
-    cookie: {maxAge: 24*60*60*1000, httpOnly: true}}
-  ));
+    cookie: {maxAge: 24*60*60*1000, httpOnly: true}
+}));
 
+// Routing
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/products", productRoutes);
@@ -39,12 +43,23 @@ app.use('/api/upload', uploadRoutes);
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
+const PORT = process.env.PORT || 5000;
+
 const startServer = async () => {
-  await connectDb();
-  app.listen(process.env.PORT, () => {
-    console.log("Serwer działa na porcie: ", process.env.PORT);
-    
-  });
+  try {
+    await connectDb(); // Łączymy z bazą tylko przy normalnym starcie
+    app.listen(PORT, () => {
+      console.log("Serwer działa na porcie: ", PORT);
+    });
+  } catch (error) {
+    console.error("Błąd uruchamiania serwera:", error);
+    process.exit(1);
+  }
+};
+
+// Uruchamiamy serwer TYLKO wtedy, gdy plik nie jest importowany przez testy
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
 }
 
-startServer();
+export default app;

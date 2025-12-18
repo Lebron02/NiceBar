@@ -119,10 +119,20 @@
   }
 }
 
-.mobile_menu {
-  width: 100%;
-  min-height: 100dvh;
-  top: 100px;
-  padding: 2.5rem 2rem ;
-  transition: all .5 ease;
+/* Nadpisanie stylu autouzupełniania Google/Chrome */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    /* 1. Zamaluj tło cieniem wewnętrznym */
+    -webkit-box-shadow: 0 0 0 30px #020617 inset !important;
+    
+    /* 2. Zmień kolor tekstu */
+    -webkit-text-fill-color: #cbd5e1 !important;
+    
+    /* 3. Zachowaj kolor kursora */
+    caret-color: #cbd5e1;
+    
+    /* 4. Opcjonalnie: upewnij się, że tekst jest widoczny przy przejściu */
+    transition: background-color 5000s ease-in-out 0s;
 }

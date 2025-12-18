@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react"; // Zmiana na lucide-react dla spójności
+import { Menu, X } from "lucide-react"; 
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +25,7 @@ const Navbar = () => {
         <header className="sticky top-0 z-50 w-full bg-slate-950 border-b border-slate-800">
             <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                 
-                <div className="text-2xl font-bold tracking-wider text-white">
+                <div className="text-4xl font-bold tracking-wider text-white">
                     <Link to={'/'}>Nicebar</Link>
                 </div>
 

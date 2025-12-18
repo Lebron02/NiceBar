@@ -9,9 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { X, Loader2 } from "lucide-react";
-
-
+import { X, Loader2, ImagePlus } from "lucide-react";
 
 const AddPost = () => {
     const [loading, setLoading] = useState(false); 
@@ -103,56 +101,71 @@ const AddPost = () => {
         }
     };
 
+    const inputClasses = "bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-blue-500";
+    const labelClasses = "text-slate-300";
+
     return (
-        <div className='w-full justify-center flex py-10'>
-            <Card className="w-full max-w-lg">
-            <CardHeader>
-                <CardTitle>Stwórz post</CardTitle>
+        <div className='min-h-screen bg-slate-950 text-slate-300 flex justify-center py-12 px-4'>
+            <Card className="w-full max-w-2xl bg-slate-900 border-slate-800 shadow-xl h-fit">
+            <CardHeader className="border-b border-slate-800 pb-6">
+                <CardTitle className="text-2xl text-white">Stwórz nowy post</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <form onSubmit={handleSubmit} id='add-post-form'>
                 <div className="flex flex-col gap-6">
                     <div className="grid gap-2">
-                        <Label>Tytuł</Label>
-                        <Input name="title" value={formData.title} onChange={handleChange} required />
+                        <Label className={labelClasses}>Tytuł</Label>
+                        <Input name="title" value={formData.title} onChange={handleChange} required className={inputClasses} placeholder="Wpisz tytuł posta..." />
                     </div>
+                    
                     <div className="grid gap-2">
-                        <Label>Opis (Treść)</Label>
+                        <Label className={labelClasses}>Slug (URL)</Label>
+                        <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" className={inputClasses} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label className={labelClasses}>Opis (Treść)</Label>
                         <Textarea 
                             name="description" 
                             value={formData.description} 
                             onChange={handleChange} 
-                            className="min-h-[150px]"
+                            className={`min-h-[200px] ${inputClasses}`}
+                            placeholder="O czym chcesz napisać?"
                             required 
                         />
                     </div>
                     
-                    <div className="grid gap-2">
-                        <Label>Slug (URL)</Label>
-                        <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" />
+                    {/* Komponent AI (zakładam, że ma swoje style, ale w razie potrzeby trzeba go dostosować osobno) */}
+                    <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
+                        <AiProductSuggester 
+                            title={formData.title}
+                            description={formData.description}
+                            availableProducts={availableProducts}
+                            selectedProducts={selectedProducts}
+                            onSelectionChange={setSelectedProducts}
+                        />
                     </div>
-                    
-                    <AiProductSuggester 
-                        title={formData.title}
-                        description={formData.description}
-                        availableProducts={availableProducts}
-                        selectedProducts={selectedProducts}
-                        onSelectionChange={setSelectedProducts}
-                    />
 
-                        <div className="grid gap-2">
-                            <Label>Zdjęcia</Label>
-                            <Input 
-                                type="file" 
-                                multiple 
-                                onChange={uploadFileHandler}
-                                disabled={uploading} 
-                            />
-                            {uploading && <p className="text-sm text-gray-500">Wysyłanie...</p>}
+                    <div className="grid gap-2">
+                        <Label className={labelClasses}>Zdjęcia</Label>
+                        <div className="flex items-center gap-4">
+                            <label className="flex-1 cursor-pointer">
+                                <div className="flex items-center justify-center w-full h-12 px-4 transition bg-slate-800 border-2 border-slate-700 border-dashed rounded-md appearance-none hover:border-slate-500 focus:outline-none">
+                                    <span className="flex items-center space-x-2">
+                                        <ImagePlus className="w-5 h-5 text-slate-400" />
+                                        <span className="font-medium text-slate-400">
+                                            {uploading ? 'Wysyłanie...' : 'Wybierz zdjęcia'}
+                                        </span>
+                                    </span>
+                                    <input type="file" name="file_upload" className="hidden" multiple onChange={uploadFileHandler} disabled={uploading} />
+                                </div>
+                            </label>
+                        </div>
 
-                            <div className="grid grid-cols-3 gap-2 mt-2">
+                        {formData.images.length > 0 && (
+                            <div className="grid grid-cols-4 gap-4 mt-4">
                                 {formData.images.map((img, index) => (
-                                    <div key={index} className="relative group border rounded overflow-hidden aspect-square">
+                                    <div key={index} className="relative group border border-slate-700 rounded-lg overflow-hidden aspect-square bg-slate-950">
                                         <img 
                                             src={getImageUrl(img)} 
                                             alt="podgląd" 
@@ -161,20 +174,21 @@ const AddPost = () => {
                                         <button
                                             type="button"
                                             onClick={() => removeImage(index)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                                         >
-                                            <X size={12} />
+                                            <X size={14} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        )}
+                    </div>
                 </div>
                 </form>
             </CardContent>
-            <CardFooter className="flex-col gap-2">
-                <Button type="submit" form='add-post-form' className="w-full" disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Dodaj post'}
+            <CardFooter className="flex-col gap-2 pt-6 border-t border-slate-800">
+                <Button type="submit" form='add-post-form' className="w-full bg-white text-slate-950 hover:bg-slate-200 font-bold py-6" disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Opublikuj post'}
                 </Button>
             </CardFooter>
             </Card>

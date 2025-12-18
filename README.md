@@ -69,35 +69,66 @@ npm install
 npm run dev
 ```
 
+## Testy aplikacji
+
+W projekcie zastosowano wielowarstwowe podejście do testowania, obejmujące testy jednostkowe komponentów (Frontend) oraz testy integracyjne API (Backend).
+
+### 1. Testy jednostkowe (Frontend)
+Testy frontendowe zostały zrealizowane przy użyciu **Vitest** oraz **React Testing Library**. Skupiają się na renderowaniu komponentów, interakcjach użytkownika oraz logice routingu.
+
+* **Lokalizacja:** `frontend/src/Tests/`
+* **Zakres testów:**
+    * `Auth.test.jsx` – Weryfikacja formularzy logowania i rejestracji, sprawdzanie walidacji haseł oraz wywoływania funkcji autoryzacyjnych.
+    * `Shop.test.jsx` – Testowanie wyświetlania produktów, logiki dodawania do koszyka, obsługi stanów magazynowych (brak towaru) oraz galerii zdjęć.
+    * `Blog.test.jsx` – Sprawdzanie renderowania postów, sekcji komentarzy (dla zalogowanych/niezalogowanych) oraz powiązanych produktów.
+    * `Routing.test.jsx` – Testowanie poprawności nawigacji oraz przekierowań (np. obsługa błędów 404).
+
+**Uruchomienie testów frontendu:**
+```bash
+docker exec -it nicebar-frontend-1 npm test
+```
+
+### 2. Testy integracyjne (Backend)
+Testy backendowe zrealizowane za pomocą **Jest** oraz **Supertest**. Weryfikują one poprawność działania endpointów API, komunikację z bazą danych MongoDB oraz mechanizmy bezpieczeństwa.
+
+* **Lokalizacja:** `backend/tests/integration.test.js`
+* **Zakres testów:**
+    * **Autentykacja** – Rejestracja, logowanie, obsługa sesji i ciasteczek **httpOnly**.
+    * **Produkty (CRUD):** – Tworzenie, odczyt, aktualizacja i usuwanie produktów.
+    * **Bezpieczeństwo:** – Weryfikacja, czy zwykły użytkownik nie ma dostępu do zasobów administratora (np. usuwanie produktów).
+    * **Walidacja:** – Sprawdzanie poprawności danych wejściowych (np. blokada ujemnych cen).
+
+**Uruchomienie testów backendu:**
+```bash
+docker exec -it nicebar-backend-1 npm test
+```
+
 ## Technologie użyte w projekcie
 **Backend:**
-
 - **Node.js** - środowisko uruchomieniowe.
-
 - **Express.js** - framework serwerowy.
-
 - **MongoDB & Mongoose** - baza danych NoSQL oraz ODM do modelowania danych.
-
 - **Express-Session & Connect-Mongo** - obsługa sesji użytkowników i ich zapis w bazie.
-
-- **Bcrypt** - hashowanie haseł.
+- **Bcrypt** - bezpieczne hashowanie haseł.
+- **Stripe API** - obsługa płatności online.
+- **Gemini API** - generowanie sugestii treści przez AI dla powiązań produktów i postów.
+- **Multer** - obsługa przesyłania plików (zdjęcia produktów).
 
 **Frontend:**
-
 - **React.js** - biblioteka do budowy interfejsu użytkownika.
-
 - **Vite** - narzędzie do budowania i uruchamiania projektu.
-
 - **React Router** - routing po stronie klienta.
-
 - **Axios** - klient HTTP do komunikacji z API.
-
+- **Stripe.js & React Stripe** - bezpieczne komponenty płatności.
 - **Tailwind CSS** - framework CSS do stylizacji.
+- **Shadcn/ui & Lucide React** - biblioteka komponentów interfejsu i ikon.
 
-- **Shadcn/ui** - biblioteka komponentów interfejsu.
+**Testowanie:**
+- **Vitest** - runner testów dla aplikacji Vite (Frontend).
+- **React Testing Library** - testowanie komponentów React.
+- **Jest** - framework testowy (Backend).
+- **Supertest** - testowanie endpointów HTTP.
 
-**Narzędzia programistyczne**:
-
-- **Docker & Docker Compose** - konteneryzacja i uruchomienie wielu serwisów na raz.
-
+**Narzędzia programistyczne:**
+- **Docker & Docker Compose** - konteneryzacja i orkiestracja serwisów.
 - **Git** - system kontroli wersji.

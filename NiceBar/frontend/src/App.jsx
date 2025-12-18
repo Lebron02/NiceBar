@@ -26,10 +26,16 @@ import HomePage from './pages/shop/HomePage';
 import SingleProduct from './pages/shop/SingleProduct';
 import Cart from './pages/shop/Cart';
 import Payment from './pages/shop/PaymentPage';
+import PlaceOrder from './pages/shop/PlaceOrder';
 
+import Contact from './pages/subpages/Contact';
+import ShippingPage from './pages/subpages/Shipping';
+import ReturnsPage from './pages/subpages/Returns';
+import PrivacyPage from './pages/subpages/Privacy';
+import AboutPage from './pages/subpages/About';
 
 import './App.css'
-import PlaceOrder from './pages/shop/PlaceOrder';
+
 
 
 function App() {
@@ -48,7 +54,6 @@ function App() {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/place-order" element={<PlaceOrder />} />
                   <Route path="/payment" element={<Payment />} />
-
 
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/add-post" element={<AddPost />} />
@@ -69,6 +74,12 @@ function App() {
                     <Route path="/admin/product/create" element={<ProductEdit />} />
                     <Route path="/admin/product/:id/edit" element={<ProductEdit />} />
                   </Route>
+
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/shipping" element={<ShippingPage />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

@@ -22,13 +22,11 @@ const AiPostSuggester = ({
 
         setAiLoading(true);
         try {
-            // Zakładamy endpoint, który na podstawie produktu zwraca ID postów
             const { data } = await api.post("/products/suggest-posts", { 
                 name: productName, 
                 description: description 
             });
             
-            // Zakładamy, że backend zwraca tablicę ID: { suggestedPostIds: [...] }
             const suggestedIds = data.suggestedPostIds || [];
             
             // Łączenie obecnych z nowymi (bez duplikatów)

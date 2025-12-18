@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { X, ImagePlus, Loader2, Save } from "lucide-react";
 import AiPostSuggester from "./../../components/AiPostSuggester"; 
 
 const ProductEdit = () => {
@@ -131,41 +131,44 @@ const ProductEdit = () => {
         }
     };
 
+    const inputClasses = "bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-blue-500";
+    const labelClasses = "text-slate-300";
+
     return (
-        <div className="flex justify-center p-6">
-            <Card className="w-full max-w-2xl">
-                <CardHeader>
-                    <CardTitle>{isEditMode ? 'Edytuj Produkt' : 'Dodaj Produkt'}</CardTitle>
+        <div className="min-h-screen bg-slate-950 text-slate-300 py-12 flex justify-center px-4">
+            <Card className="w-full max-w-3xl bg-slate-900 border-slate-800 h-fit">
+                <CardHeader className="border-b border-slate-800 pb-6">
+                    <CardTitle className="text-white text-2xl">{isEditMode ? 'Edytuj Produkt' : 'Dodaj Nowy Produkt'}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <CardContent className="pt-8">
+                    <form onSubmit={handleSubmit} className="space-y-8">
 
-                        <div className="grid gap-4">
+                        <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label>Nazwa</Label>
-                                <Input name="name" value={formData.name} onChange={handleChange} required />
+                                <Label className={labelClasses}>Nazwa</Label>
+                                <Input name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Np. Zestaw Barmański Premium" />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label>Slug (URL)</Label>
-                                <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" />
+                                <Label className={labelClasses}>Slug (URL)</Label>
+                                <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="Zostaw puste dla auto-generacji" className={inputClasses} />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="grid gap-2">
-                                    <Label>Cena</Label>
-                                    <Input type="number" name="price" value={formData.price} onChange={handleChange} required />
+                                    <Label className={labelClasses}>Cena (PLN)</Label>
+                                    <Input type="number" name="price" value={formData.price} onChange={handleChange} required className={inputClasses} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Ilość w magazynie</Label>
-                                    <Input type="number" name="countInStock" value={formData.countInStock} onChange={handleChange} required />
+                                    <Label className={labelClasses}>Ilość w magazynie</Label>
+                                    <Input type="number" name="countInStock" value={formData.countInStock} onChange={handleChange} required className={inputClasses} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-6">
                             <div className="grid gap-2">
-                                <Label>Kategoria</Label>
+                                <Label className={labelClasses}>Kategoria</Label>
                                 <Input 
                                     name="category" 
                                     value={formData.category} 
@@ -174,33 +177,35 @@ const ProductEdit = () => {
                                     placeholder="Wybierz lub wpisz nową"
                                     required 
                                     autoComplete="off"
+                                    className={inputClasses}
                                 />
                                 <datalist id="categories-list">
                                     {categories.map((cat) => (
                                         <option key={cat._id} value={cat.name} />
                                     ))}
                                 </datalist>
-                                <p className="text-[10px] text-gray-500">Wybierz z listy lub wpisz, aby utworzyć nową.</p>
+                                <p className="text-xs text-slate-500">Wybierz z listy lub wpisz, aby utworzyć nową.</p>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label>Marka</Label>
-                                <Input name="brand" value={formData.brand} onChange={handleChange} required />
+                                <Label className={labelClasses}>Marka</Label>
+                                <Input name="brand" value={formData.brand} onChange={handleChange} required className={inputClasses} />
                             </div>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>Opis</Label>
+                            <Label className={labelClasses}>Opis</Label>
                             <Textarea 
                                 name="description" 
                                 value={formData.description} 
                                 onChange={handleChange} 
-                                className="min-h-[150px]"
+                                className={`min-h-[150px] ${inputClasses}`}
                                 required 
                             />
                         </div>
 
-                        <div className="pt-2">
+                        {/* Komponent AI - Sugestie Postów */}
+                        <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
                             <AiPostSuggester 
                                 productName={formData.name}
                                 description={formData.description}
@@ -210,38 +215,51 @@ const ProductEdit = () => {
                             />
                         </div>
 
-                        <div className="grid gap-2 border-t pt-4">
-                            <Label>Zdjęcia</Label>
-                            <Input 
-                                type="file" 
-                                multiple 
-                                onChange={uploadFileHandler}
-                                disabled={uploading} 
-                            />
-                            {uploading && <p className="text-sm text-gray-500">Wysyłanie...</p>}
-
-                            <div className="grid grid-cols-4 gap-2 mt-2">
-                                {formData.images.map((img, index) => (
-                                    <div key={index} className="relative group border rounded overflow-hidden aspect-square">
-                                        <img 
-                                            src={getImageUrl(img)} 
-                                            alt="podgląd" 
-                                            className="w-full h-full object-cover"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeImage(index)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                                        >
-                                            <X size={12} />
-                                        </button>
+                        <div className="grid gap-3 pt-2">
+                            <Label className={labelClasses}>Zdjęcia Produktu</Label>
+                            
+                            <div className="flex items-center gap-4">
+                                <label className="flex-1 cursor-pointer">
+                                    <div className="flex items-center justify-center w-full h-12 px-4 transition bg-slate-800 border-2 border-slate-700 border-dashed rounded-md appearance-none hover:border-slate-500 focus:outline-none">
+                                        <span className="flex items-center space-x-2">
+                                            <ImagePlus className="w-5 h-5 text-slate-400" />
+                                            <span className="font-medium text-slate-400">
+                                                {uploading ? 'Wysyłanie...' : 'Dodaj zdjęcia'}
+                                            </span>
+                                        </span>
+                                        <input type="file" name="file_upload" className="hidden" multiple onChange={uploadFileHandler} disabled={uploading} />
                                     </div>
-                                ))}
+                                </label>
                             </div>
+
+                            {formData.images.length > 0 && (
+                                <div className="grid grid-cols-4 gap-4 mt-2">
+                                    {formData.images.map((img, index) => (
+                                        <div key={index} className="relative group border border-slate-700 rounded-lg overflow-hidden aspect-square bg-slate-950">
+                                            <img 
+                                                src={getImageUrl(img)} 
+                                                alt="podgląd" 
+                                                className="w-full h-full object-contain p-2"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? 'Zapisywanie...' : (isEditMode ? 'Zaktualizuj' : 'Utwórz')}
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 mt-4" disabled={loading}>
+                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (
+                                <span className="flex items-center text-lg">
+                                    <Save className="mr-2 h-5 w-5" /> {isEditMode ? 'Zaktualizuj produkt' : 'Utwórz produkt'}
+                                </span>
+                            )}
                         </Button>
                     </form>
                 </CardContent>

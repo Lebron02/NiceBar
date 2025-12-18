@@ -76,10 +76,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const updatePost = async (title, description, id) => {
+    const updatePost = async (id, postData) => {
         setLoading(true)
             try {
-                const response = await api.put(`/posts/${id}`, {title, description});
+                return await api.put(`/posts/${id}`, postData);
                 console.log(response);
             } catch (err) {
                 console.error(err);

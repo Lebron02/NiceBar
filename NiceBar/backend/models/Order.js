@@ -41,6 +41,7 @@ const orderSchema = mongoose.Schema({
         default: 'Pending Packaging',
         required: true
     },
+    deliveredAt: { type: Date },
 }, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);
