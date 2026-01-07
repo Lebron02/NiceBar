@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { getImageUrl } from '../../services/config';
 import { FileText, PlusCircle } from 'lucide-react';
-
 import { Button } from "@/components/ui/button"
 
 const Blog = () => {
@@ -34,7 +33,7 @@ const Blog = () => {
     return (
         <div className="min-h-screen bg-slate-950 text-slate-300 pb-20">
             {/* Hero Header */}
-            <div className="bg-slate-900/50 border-b border-slate-800 py-16 mb-12">
+            <div className="bg-slate-900/50 border-b border-slate-800 py-10 mb-12">
                 <div className="container mx-auto px-6 text-center">
                     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-4">
                         Blog Barmański

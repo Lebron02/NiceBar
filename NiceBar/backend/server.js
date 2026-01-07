@@ -7,9 +7,11 @@ import MongoStore from "connect-mongo";
 
 import connectDb from "./config/db.js";
 import authRoutes from "./routing/auth.js"
+import usersRoutes from "./routing/users.js"
 import postRoutes from "./routing/posts.js"
 import productRoutes from "./routing/products.js";
 import orderRoutes from "./routing/orders.js";
+import categoryRoutes from "./routing/categories.js";
 import uploadRoutes from './routing/upload.js';
 
 dotenv.config()
@@ -35,9 +37,11 @@ app.use(session({
 
 // Routing
 app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 
 const __dirname = path.resolve();

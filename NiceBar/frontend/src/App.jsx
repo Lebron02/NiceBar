@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './services/AuthContext';
 import { ShopProvider } from './services/ShopContext';
 
+import { Toaster } from 'sonner';
+
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -14,8 +16,12 @@ import UserLayout from './pages/user/UserLayout';
 import UserOrders from './pages/user/UserOrders';
 import UserSettings from './pages/user/UserSettings';
 
-import AdminRoute from './components/AdminRoute';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminHome from './pages/admin/AdminHome';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminOrders from './pages/admin/AdminOrders';
 import ProductEdit from './pages/admin/ProductEdit';
 
 import Blog from './pages/blog/Blog';
@@ -36,16 +42,12 @@ import AboutPage from './pages/subpages/About';
 
 import './App.css'
 
-
-
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ShopProvider>
-            
             <div className="flex flex-col min-h-screen"> 
-
               <Navbar />
               <main className="flex-grow">
                 <Routes>
@@ -69,10 +71,15 @@ function App() {
                       <Route path="settings" element={<UserSettings />} />
                   </Route>
                   
-                  <Route element={<AdminRoute />}>
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin/product/create" element={<ProductEdit />} />
-                    <Route path="/admin/product/:id/edit" element={<ProductEdit />} />
+                  <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<Navigate to="dashboard" replace />} />
+                      <Route path="dashboard" element={<AdminHome />} />
+                      <Route path="products" element={<AdminProducts />} />
+                      <Route path="categories" element={<AdminCategories />} />
+                      <Route path="orders" element={<AdminOrders />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="product/create" element={<ProductEdit />} /> 
+                      <Route path="product/:id/edit" element={<ProductEdit />} /> 
                   </Route>
 
                   <Route path="/contact" element={<Contact />} />
@@ -82,7 +89,24 @@ function App() {
                   <Route path="/privacy" element={<PrivacyPage />} />
 
                   <Route path="*" element={<Navigate to="/" replace />} />
+
                 </Routes>
+                <Toaster 
+                    position="bottom-right" 
+                    theme="dark"
+                    toastOptions={{
+                      classNames: {
+                        toast: 'bg-slate-900 border border-slate-800 text-slate-200 shadow-xl',
+                        title: 'text-white font-bold',
+                        description: 'text-slate-400',
+                        actionButton: 'bg-blue-600',
+                        cancelButton: 'bg-slate-700',
+                        success: 'text-emerald-400 border-emerald-500/20',
+                        error: 'text-red-400 border-red-500/20',
+                        info: 'text-blue-400 border-blue-500/20',
+                      },
+                    }}
+                  />
               </main>
               <Footer /> 
            </div>

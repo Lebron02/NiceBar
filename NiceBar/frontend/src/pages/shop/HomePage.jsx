@@ -62,14 +62,13 @@ const HomePage = () => {
                         {products.map((product) => (
                             <Link to={`/products/${product.slug}`} key={product._id} className="group block h-full">
                                 <div className='bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-blue-900/10 hover:border-slate-700 transition-all duration-300 h-full flex flex-col'>
-                                    <div className="relative w-full aspect-square overflow-hidden bg-slate-950 p-4">
-                                        <div className="w-full h-full rounded-lg overflow-hidden bg-white/5 flex items-center justify-center">
-                                            <img 
-                                                alt={product.title} 
-                                                src={getImageUrl(product.images?.[0])}
-                                                className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                        </div>
+                                    
+                                    <div className="w-full aspect-square overflow-hidden bg-slate-950 relative">
+                                        <img 
+                                            alt={product.title} 
+                                            src={getImageUrl(product.images?.[0])}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
                                     </div>
                                     
                                     <div className="p-5 flex flex-col flex-1">
@@ -83,7 +82,7 @@ const HomePage = () => {
                                         </h3>
                                         <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-800">
                                             <p className="text-xl font-bold text-white">
-                                                {product.price} <span className="text-sm font-normal text-slate-500">PLN</span>
+                                                {Number(product.price).toFixed(2)} <span className="text-sm font-normal text-slate-500">PLN</span>
                                             </p>
                                             <span className="text-sm text-slate-400 group-hover:text-white transition-colors">
                                                 Zobacz &rarr;

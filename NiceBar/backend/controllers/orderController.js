@@ -5,7 +5,12 @@ export const addOrderItems = async (req, res) => {
         const order = await orderService.createOrder(req.body, req.user.userId);
         res.status(201).json(order);
     } catch (error) {
-        const status = error.message === "Brak elementów zamówienia" ? 400 : 500;
+        // Sprawdzamy czy błąd dotyczy braku produktów lub ich ilości
+        const isValidationError = 
+            error.message === "Brak elementów zamówienia" || 
+            error.message.includes("nie jest dostępny w wybranej ilości");
+
+        const status = isValidationError ? 400 : 500;
         res.status(status).json({ message: error.message });
     }
 };

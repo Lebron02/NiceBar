@@ -50,10 +50,10 @@ const AiPostSuggester = ({
     };
 
     return (
-        <div className="border p-4 rounded-md bg-slate-50 space-y-3">
+        <div className="border p-4 rounded-md bg-slate-900 text-slate-300 border-slate-950 space-y-3">
             <div className="flex justify-between items-center">
                 <div>
-                    <Label className="text-lg">Powiązane Posty (Blog)</Label>
+                    <Label className="text-lg">Powiązane posty na blogu</Label>
                     <p className="text-sm text-gray-500">Wybierz artykuły powiązane z tym produktem.</p>
                 </div>
                 
@@ -62,18 +62,18 @@ const AiPostSuggester = ({
                     variant="outline" 
                     onClick={handleAiSuggest}
                     disabled={aiLoading}
-                    className="border-blue-500 text-blue-700 hover:bg-blue-50"
+                    className="border-blue-600 bg-blue-600 hover:bg-blue-500 text-white hover:text-white"
                 >
                     {aiLoading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Wand2 className="mr-2 h-4 w-4" />
                     )}
-                    {aiLoading ? "Analizowanie..." : "Dobierz (AI)"}
+                    {aiLoading ? "Analizowanie..." : "Dobierz z AI"}
                 </Button>
             </div>
 
-            <div className="h-48 overflow-y-auto border rounded bg-white p-2 grid grid-cols-1 gap-2">
+            <div className="h-48 overflow-y-auto border rounded bg-slate-900 border-slate-800 p-2 grid grid-cols-1 gap-2">
                 {availablePosts.length === 0 ? (
                     <p className="text-center text-gray-500 py-4">Brak postów na blogu.</p>
                 ) : (
@@ -85,7 +85,7 @@ const AiPostSuggester = ({
                                 key={post._id} 
                                 onClick={() => togglePost(post._id)}
                                 className={`p-2 rounded flex items-center justify-between cursor-pointer border transition-colors ${
-                                    isSelected ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:bg-gray-100'
+                                    isSelected ? 'border-blue-500 bg-slate-800' : 'border-transparent hover:bg-slate-800'
                                 }`}
                             >
                                 <div className="flex items-center gap-3">

@@ -135,7 +135,6 @@ const AddPost = () => {
                         />
                     </div>
                     
-                    {/* Komponent AI (zakładam, że ma swoje style, ale w razie potrzeby trzeba go dostosować osobno) */}
                     <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
                         <AiProductSuggester 
                             title={formData.title}

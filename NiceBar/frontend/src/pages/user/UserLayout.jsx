@@ -4,7 +4,7 @@ import { useAuth } from '../../services/AuthContext';
 import { Button } from "@/components/ui/button";
 import { 
     LayoutDashboard, 
-    Package, 
+    ShoppingCart,
     MapPin, 
     Settings, 
     LogOut, 
@@ -41,7 +41,7 @@ const UserLayout = () => {
                                 </NavLink>
                                 
                                 <NavLink to="orders" className={getLinkClass}>
-                                    <Package className="mr-3 h-4 w-4" /> Zamówienia
+                                    <ShoppingCart className="mr-3 h-4 w-4" /> Zamówienia
                                 </NavLink>
                                 
                                 <NavLink to="address" className={getLinkClass}>
@@ -55,7 +55,7 @@ const UserLayout = () => {
                                 {user.role === 'admin' && (
                                     <Link to="/admin/dashboard" className="w-full mt-2">
                                         <Button variant="ghost" className="justify-start text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 w-full pl-4">
-                                            <UserIcon className="mr-3 h-4 w-4" /> Panel Admina
+                                            <UserIcon className="mr-3 h-4 w-4" /> Panel Administratora
                                         </Button>
                                     </Link>
                                 )}

@@ -56,8 +56,8 @@ const ChangeAddressForm = ({ onCancel, onSuccess }) => {
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <div className="flex gap-3 pt-4">
-                <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-500 text-white">{loading ? 'Zapisywanie...' : 'Zapisz zmiany'}</Button>
-                <Button type="button" variant="outline" onClick={onCancel} className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">Anuluj</Button>
+                <Button type="submit" disabled={loading} className=" bg-blue-600 hover:bg-blue-500 text-white">{loading ? 'Zapisywanie...' : 'Zapisz zmiany'}</Button>
+                <Button type="button" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-950 hover:bg-slate-800 hover:text-white">Anuluj</Button>
             </div>
         </form>
     );
@@ -73,13 +73,8 @@ const UserAddress = () => {
              <h2 className="text-2xl font-bold tracking-tight text-white">Dane do zamówień</h2>
             <Card className="bg-slate-900 border-slate-800">
                 <CardHeader className="border-b border-slate-800 pb-4">
-                    <div className="flex justify-between items-center">
+                    <div className="justify-between items-center">
                         <CardTitle className="text-white">Adres dostawy</CardTitle>
-                        {isEditing && (
-                            <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white hover:bg-slate-800">
-                                <ChevronLeft className="w-4 h-4 mr-1"/> Wróć
-                            </Button>
-                        )}
                     </div>
                     <CardDescription className="text-slate-400">Zarządzaj domyślnym adresem dostawy.</CardDescription>
                 </CardHeader>
@@ -101,7 +96,6 @@ const UserAddress = () => {
                                             <p>{user.address.postalCode} {user.address.city}</p>
                                         </>
                                     ) : <p className="italic text-slate-600">Brak zapisanego adresu</p>}
-                                    <p className="text-sm text-slate-500 mt-3 pt-3 border-t border-slate-800">{user.email}</p>
                                 </div>
                             </div>
                         </div>

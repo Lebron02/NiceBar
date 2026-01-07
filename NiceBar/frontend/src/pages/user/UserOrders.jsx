@@ -1,13 +1,56 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { getImageUrl } from '../../services/config';
-import { Loader2, ShoppingBag, Calendar, CreditCard } from 'lucide-react';
+import { Loader2, ShoppingBag, Calendar, CreditCard, IdCard, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
+// Komponent licznika czasu
+const PaymentCountdown = ({ createdAt }) => {
+    const [timeLeft, setTimeLeft] = useState(null);
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const orderTime = new Date(createdAt).getTime();
+            const deadline = orderTime + (24 * 60 * 60 * 1000); 
+            const now = new Date().getTime();
+            const difference = deadline - now;
+
+            if (difference <= 0) {
+                return null; // Czas minął
+            }
+
+            const hours = Math.floor(difference / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return { hours, minutes };
+        };
+
+        // Obliczamy od razu
+        setTimeLeft(calculateTimeLeft());
+
+        // Aktualizujemy co minutę
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 60000);
+
+        return () => clearInterval(timer);
+    }, [createdAt]);
+
+    if (!timeLeft) return <span>Czas na płatność minął.</span>;
+
+    return (
+        <span>
+            Pozostało na opłacenie: <span className="font-mono font-bold">{timeLeft.hours}h {timeLeft.minutes}m</span>
+        </span>
+    );
+};
+
 const UserOrders = () => {
     const { api } = useAuth();
+    const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,8 +71,18 @@ const UserOrders = () => {
         fetchOrders();
     }, [api]);
 
+    const isOrderExpired = (createdAt) => {
+        const orderDate = new Date(createdAt);
+        const now = new Date();
+        const diffHours = (now - orderDate) / (1000 * 60 * 60);
+        return diffHours > 24;
+    };
+
     const resolveStatus = (order) => {
         if (!order.isPaid) {
+            if (isOrderExpired(order.createdAt)) {
+                return { label: "Anulowane (brak wpłaty)", color: "bg-red-500/10 text-red-500 border-red-500/20" };
+            }
             return { label: "Oczekuje na płatność", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" };
         }
         switch (order.deliveryStatus) {
@@ -64,26 +117,33 @@ const UserOrders = () => {
             <div className="space-y-4">
                 {orders.map((order) => {
                     const status = resolveStatus(order);
+                    const expired = isOrderExpired(order.createdAt);
+
                     return (
-                        <Card key={order._id} className="overflow-hidden bg-slate-900 border-slate-800">
+                        <Card key={order._id} className="overflow-hidden bg-slate-900 border-slate-800 transition-colors hover:border-slate-700 py-0">
                             <div className="bg-slate-950 p-4 border-b border-slate-800 flex flex-wrap gap-4 justify-between items-center text-sm">
-                                <div className="flex gap-8">
+                                <div className="flex flex-wrap gap-x-8 gap-y-2">
                                     <div>
                                         <p className="text-slate-500 flex items-center gap-1 mb-1"><Calendar className="w-3 h-3"/> Data złożenia</p>
-                                        <p className="font-medium text-slate-300">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                        <p className="font-medium text-slate-300">
+                                            {new Date(order.createdAt).toLocaleDateString()} 
+                                        </p>
                                     </div>
                                     <div>
                                         <p className="text-slate-500 flex items-center gap-1 mb-1"><CreditCard className="w-3 h-3"/> Suma</p>
                                         <p className="font-medium text-slate-300">{order.totalPrice.toFixed(2)} PLN</p>
                                     </div>
+                                    <div>
+                                        <p className="text-slate-500 flex items-center gap-1 mb-1"><IdCard className="w-3 h-3"/> Numer zamówienia</p>
+                                        <p className="font-medium text-slate-300 font-mono">{order._id}</p>
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <p className="text-slate-600 text-xs hidden sm:block">Nr: {order._id}</p>
                                     <Badge className={`${status.color} border px-3 py-1 font-medium`}>{status.label}</Badge>
                                 </div>
                             </div>
 
-                            <CardContent className="p-6">
+                            <CardContent className="px-6 pb-6">
                                 <div className="space-y-4">
                                     {order.orderItems.map((item, index) => (
                                         <div key={index} className="flex items-center gap-4">
@@ -107,9 +167,26 @@ const UserOrders = () => {
                             </CardContent>
                             
                             {!order.isPaid && (
-                                <CardFooter className="bg-slate-950/50 p-4 flex justify-end border-t border-slate-800">
-                                     <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white" onClick={() => window.location.href=`/payment?orderId=${order._id}`}>
-                                          Dokończ płatność
+                                <CardFooter className="bg-slate-950/50 p-4 flex justify-between items-center border-t border-slate-800 -mt-6">
+                                     {expired ? (
+                                         <div className="text-sm text-red-400 flex items-center gap-2">
+                                             <AlertCircle className="w-4 h-4" />
+                                             To zamówienie wygasło z powodu braku wpłaty.
+                                         </div>
+                                     ) : (
+                                         <div className="text-sm text-yellow-500 flex items-center gap-2">
+                                             <Clock className="w-4 h-4" />
+                                             <PaymentCountdown createdAt={order.createdAt} />
+                                         </div>
+                                     )}
+
+                                     <Button 
+                                        size="sm" 
+                                        disabled={expired}
+                                        className={`${expired ? 'bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white'}`} 
+                                        onClick={() => !expired && navigate(`/payment?orderId=${order._id}`)}
+                                     >
+                                          {expired ? 'Płatność niedostępna' : 'Dokończ płatność'}
                                      </Button>
                                 </CardFooter>
                             )}

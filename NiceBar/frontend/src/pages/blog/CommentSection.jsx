@@ -4,6 +4,7 @@ import { useAuth } from '../../services/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare } from 'lucide-react';
+import { toast } from "sonner";
 
 const CommentsSection = ({ postId, comments, onCommentAdded }) => {
     const { isLoggedIn, api, user } = useAuth();
@@ -19,8 +20,14 @@ const CommentsSection = ({ postId, comments, onCommentAdded }) => {
             await api.post(`/posts/${postId}/comments`, { text });
             setText("");
             if (onCommentAdded) onCommentAdded();
+            toast.success("Post zaktualizowany", {
+                description: "Komentarz został opublikowany"
+            });
         } catch (error) {
             console.error("Błąd dodawania komentarza", error);
+            toast.error("Błąd dodawania komentarza", {
+                description: "Komentarz nie został opublikowany"
+            });
         } finally {
             setLoading(false);
         }

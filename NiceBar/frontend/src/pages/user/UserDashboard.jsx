@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Clock, MapPin } from 'lucide-react';
+import { User, Mail, Calendar, MapPin } from 'lucide-react';
 
 const UserDashboard = () => {
     const { user } = useAuth();
@@ -12,7 +12,6 @@ const UserDashboard = () => {
         <div className="space-y-8 animate-in fade-in duration-500">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight text-white">Cześć, {user.firstName}!</h2>
-                <p className="text-slate-400 mt-2">To jest Twój panel klienta. Możesz tu zarządzać swoimi zamówieniami i danymi.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -24,11 +23,11 @@ const UserDashboard = () => {
                     </CardHeader>
                     <CardContent className="pt-2 space-y-4">
                        <div className="flex items-center gap-3 text-slate-300">
-                            <span className="text-slate-500 w-20">Email:</span> 
+                            <Mail className="w-3 h-3"/><span className="text-slate-500 flex items-center gap-1">Twój adres e-mail: </span> 
                             {user.email}
                        </div>
                        <div className="flex items-center gap-3 text-slate-300">
-                            <span className="text-slate-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Dołączyłeś:</span> 
+                            <Calendar className="w-3 h-3"/><span className="text-slate-500 flex items-center gap-1">Data utworzenia konta:</span> 
                             {new Date(user.createdAt).toLocaleDateString()}
                        </div>
                     </CardContent>

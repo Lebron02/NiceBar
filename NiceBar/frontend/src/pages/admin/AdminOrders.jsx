@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 
 import { Button } from "@/components/ui/button";
@@ -8,86 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Loader2, Check, Truck, Box } from 'lucide-react';
-
-const AdminProducts = () => {
-    const [products, setProducts] = useState([]);
-    const { api } = useAuth();
-
-    const fetchProducts = async () => {
-        try {
-            const { data } = await api.get('/products');
-            setProducts(data);
-        } catch (error) {
-            console.error("Błąd pobierania produktów", error);
-        }
-    };
-
-    useEffect(() => { fetchProducts(); }, []);
-
-    const deleteHandler = async (id) => {
-        if (window.confirm('Usunąć produkt?')) {
-            try {
-                await api.delete(`/products/${id}`);
-                fetchProducts(); 
-            } catch (error) {
-                alert("Błąd usuwania");
-            }
-        }
-    };
-
-    return (
-        <Card className="bg-slate-900 border-slate-800">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-800 pb-4">
-                <div>
-                    <CardTitle className="text-white">Produkty</CardTitle>
-                    <CardDescription className="text-slate-400">Zarządzaj asortymentem sklepu</CardDescription>
-                </div>
-                <Link to="/admin/product/create">
-                    <Button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-lg shadow-blue-900/20">
-                        + Dodaj Produkt
-                    </Button>
-                </Link>
-            </CardHeader>
-            <CardContent className="pt-4">
-                <div className="rounded-md border border-slate-800 overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-slate-950">
-                            <TableRow className="border-slate-800 hover:bg-slate-950">
-                                <TableHead className="text-slate-400">ID</TableHead>
-                                <TableHead className="text-slate-400">Nazwa</TableHead>
-                                <TableHead className="text-slate-400">Cena</TableHead>
-                                <TableHead className="text-slate-400">Kategoria</TableHead>
-                                <TableHead className="text-right pr-15 text-slate-400">Akcje</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product._id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
-                                    <TableCell className="text-xs font-mono text-slate-500">{product._id.substring(product._id.length - 6)}</TableCell>
-                                    <TableCell className="font-medium text-slate-200">{product.name}</TableCell>
-                                    <TableCell className="text-slate-300">{product.price} PLN</TableCell>
-                                    <TableCell>
-                                        <Badge variant="secondary" className="bg-slate-800 text-slate-300 hover:bg-slate-700">
-                                            {product.category?.name || '-'}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right space-x-2">
-                                        <Link to={`/admin/product/${product._id}/edit`}>
-                                            <Button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-lg shadow-blue-900/20">Edytuj</Button>
-                                        </Link>
-                                        <Button variant="destructive" size="sm" onClick={() => deleteHandler(product._id)} className="bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20">Usuń</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
+import { Loader2, Check, Truck, Box, Package } from 'lucide-react';
 
 const AdminOrders = () => {
     const { api } = useAuth();
@@ -130,7 +50,7 @@ const AdminOrders = () => {
     return (
         <Card className="bg-slate-900 border-slate-800">
             <CardHeader className="border-b border-slate-800 pb-4">
-                <CardTitle className="text-white">Wszystkie Zamówienia</CardTitle>
+                <CardTitle className="text-white text-2xl">Wszystkie zamówienia</CardTitle>
                 <CardDescription className="text-slate-400">Przeglądaj i zmieniaj statusy dostaw.</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
@@ -150,7 +70,7 @@ const AdminOrders = () => {
                             {orders.map((order) => (
                                 <TableRow key={order._id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
                                     <TableCell>
-                                        <div className="font-bold text-xs font-mono text-slate-300">{order._id.substring(order._id.length - 6)}</div>
+                                        <div className="font-bold text-xs font-mono text-slate-300">{order._id}</div>
                                         <div className="text-xs text-slate-500">
                                             {order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Gość'}
                                         </div>
@@ -216,6 +136,10 @@ const AdminOrders = () => {
                                                                 <span className="font-medium text-white">{(item.price * item.qty).toFixed(2)} zł</span>
                                                             </div>
                                                         ))}
+                                                        <div className="flex justify-between text-lg py-2 border-slate-800 hover:bg-slate-800/30 px-2 rounded">
+                                                            <span className="text-slate-300">Suma: </span>
+                                                            <span className="font-medium text-white">{order.totalPrice.toFixed(2)} zł</span>
+                                                        </div>   
                                                     </div>
                                                 </div>
                                             </DialogContent>
@@ -231,56 +155,4 @@ const AdminOrders = () => {
     );
 };
 
-const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState('products');
-    const { logout } = useAuth();
-
-    return (
-        <div className="min-h-screen bg-slate-950 text-slate-300">
-            <div className="container mx-auto py-12 px-4 md:px-8">
-                <div className="flex flex-col md:flex-row gap-8">
-                    {/* SIDEBAR */}
-                    <aside className="w-full md:w-64 shrink-0">
-                        <div className="sticky top-24 space-y-4">
-                            <div className="px-4 mb-2 font-bold text-xl text-white flex items-center gap-2">
-                                <LayoutDashboard className="h-6 w-6 text-blue-500" /> Admin
-                            </div>
-                            <nav className="flex flex-col gap-1">
-                                <Button 
-                                    className={`justify-start w-full ${activeTab === 'products' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
-                                    onClick={() => setActiveTab('products')}
-                                >
-                                    <Package className="mr-3 h-4 w-4" /> Produkty
-                                </Button>
-                                <Button 
-                                    className={`justify-start w-full ${activeTab === 'orders' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`} 
-                                    onClick={() => setActiveTab('orders')}
-                                >
-                                    <ShoppingCart className="mr-3 h-4 w-4" /> Zamówienia
-                                </Button>
-                                
-                                <div className="pt-4 mt-4 border-t border-slate-800">
-                                    <Link to="/profile">
-                                        <Button className="justify-start w-full text-slate-400 hover:text-white hover:bg-slate-900">
-                                            <LayoutDashboard className="mr-3 h-4 w-4" /> Wróć do sklepu
-                                        </Button>
-                                    </Link>
-                                    <Button className="justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 w-full" onClick={logout}>
-                                        <LogOut className="mr-3 h-4 w-4" /> Wyloguj
-                                    </Button>
-                                </div>
-                            </nav>
-                        </div>
-                    </aside>
-
-                    <main className="flex-1 min-h-[500px]">
-                        {activeTab === 'products' && <AdminProducts />}
-                        {activeTab === 'orders' && <AdminOrders />}
-                    </main>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default AdminDashboard;
+export default AdminOrders;

@@ -48,7 +48,7 @@ const AiProductSuggester = ({
     };
 
     return (
-        <div className="border p-4 rounded-md bg-slate-50 space-y-3">
+        <div className="border p-4 rounded-md bg-slate-900 text-slate-300 border-slate-950 space-y-3">
             <div className="flex justify-between items-center">
                 <div>
                     <Label className="text-lg">Powiązane produkty</Label>
@@ -60,20 +60,20 @@ const AiProductSuggester = ({
                     variant="outline" 
                     onClick={handleAiSuggest}
                     disabled={aiLoading || !description}
-                    className="border-purple-500 text-purple-700 hover:bg-purple-50"
+                    className="border-blue-600 bg-blue-600 hover:bg-blue-500 text-white hover:text-white"
                 >
                     {aiLoading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Wand2 className="mr-2 h-4 w-4" />
                     )}
-                    {aiLoading ? "Analizowanie..." : "Zasugeruj (AI)"}
+                    {aiLoading ? "Analizowanie..." : "Dobierz z AI"}
                 </Button>
             </div>
 
-            <div className="h-48 overflow-y-auto border rounded bg-white p-2 grid grid-cols-1 gap-2">
+            <div className="h-48 overflow-y-auto border rounded bg-slate-900 border-slate-800 p-2 grid grid-cols-1 gap-2">
                 {availableProducts.length === 0 ? (
-                    <p className="text-center text-gray-500 py-4">Brak produktów w magazynie.</p>
+                    <p className="text-center text-gray-500 py-4">Brak produktów </p>
                 ) : (
                     availableProducts.map(product => {
                         const isSelected = selectedProducts.includes(product._id);
@@ -87,8 +87,8 @@ const AiProductSuggester = ({
                                 key={product._id} 
                                 onClick={() => toggleProduct(product._id)}
                                 className={`p-2 rounded flex items-center justify-between cursor-pointer border transition-colors ${
-                                    isSelected ? 'border-green-500 bg-green-50' : 'border-transparent hover:bg-gray-100'
-                                }`}
+                                isSelected ? 'border-blue-500 bg-slate-800' : 'border-transparent hover:bg-slate-800'
+                            }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="flex flex-col">
@@ -98,7 +98,7 @@ const AiProductSuggester = ({
                                         </p>
                                     </div>
                                 </div>
-                                {isSelected && <Check className="w-4 h-4 text-green-600" />}
+                                {isSelected && <Check className="w-4 h-4 text-blue-600" />}
                             </div>
                         );
                     })

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ShoppingCart, Edit2, Trash2, Calendar, User, Package, Save, X, ImagePlus } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   Carousel,
@@ -97,7 +98,7 @@ const SinglePost = () => {
     } catch (error) {
       console.error(error);
       setUploading(false);
-      alert('Błąd uploadu zdjęcia.');
+      toast.error("Błąd uploadu zdjęcia.");
     }
   };
 
@@ -121,6 +122,10 @@ const SinglePost = () => {
 
       await updatePost(post._id, updatedData);
 
+      toast.success("Post zaktualizowany", {
+          description: "Treść artykułu została pomyślnie zmieniona."
+      });
+
       setIsEditing(false);
       
       if (slugField !== slug) {
@@ -130,7 +135,9 @@ const SinglePost = () => {
       }
     } catch (err) {
       console.error("Błąd edycji:", err);
-      setError(err.response?.data?.message || 'Nie udało się zaktualizować posta.');
+      toast.error("Wystąpił błąd", {
+          description: err.response?.data?.message || 'Nie udało się zaktualizować posta.'
+      });
     }
   };
 
@@ -138,15 +145,15 @@ const SinglePost = () => {
     if (!window.confirm("Czy na pewno chcesz usunąć ten post?")) return;
     try {
       await api.delete(`/posts/${post._id}`);
+      toast.success("Post usunięty");
       goBack("/");
     } catch (err) {
-      alert("Nie udało się usunąć posta");
+      toast.error("Nie udało się usunąć posta");
     }
   };
 
   const handleAddToCart = (product) => {
     addToCart(product, 1);
-    alert("Dodano produkt do koszyka!");
   };
 
   const ProductCard = ({ product }) => (
@@ -184,6 +191,9 @@ const SinglePost = () => {
   if (error) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-red-500">{error}</div>;
   if (!post) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Post nie istnieje</div>;
 
+  const isAuthor = user && post?.userId && user._id === post.userId._id;
+  const canManage = isAuthor; 
+
   const inputClasses = "bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-blue-500";
   const labelClasses = "text-slate-300";
 
@@ -191,7 +201,8 @@ const SinglePost = () => {
     <div className="min-h-screen bg-slate-950 text-slate-300 py-12">
       <div className="container mx-auto px-6 max-w-7xl">
         
-        {user && (
+        {/* Wyświetlamy przyciski tylko jeśli użytkownik ma uprawnienia (jest autorem) */}
+        {canManage && (
           <div className="mb-6 flex justify-end gap-3">
             <Button variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800" onClick={() => setIsEditing(!isEditing)}>
               {isEditing ? <><X className="w-4 h-4 mr-2" /> Anuluj edycję</> : <><Edit2 className="w-4 h-4 mr-2" /> Edytuj post</>}
@@ -208,7 +219,7 @@ const SinglePost = () => {
             <div className="flex flex-col lg:flex-row border-b border-slate-800">
                 
                 {/* --- LEWA KOLUMNA (Zdjęcia + Treść) --- */}
-                <div className="flex-1 lg:border-r border-slate-800 min-w-0"> {/* min-w-0 zapobiega rozpychaniu flexa przez karuzelę */}
+                <div className="flex-1 lg:border-r border-slate-800 min-w-0"> 
                     
                     {/* Galeria Zdjęć Posta */}
                     <div className="w-full bg-slate-950 border-b border-slate-800 p-8 flex justify-center">
@@ -269,7 +280,6 @@ const SinglePost = () => {
                             <Package className="text-blue-500" /> Użyte produkty
                         </h3>
                         
-                        {/* Logika wyświetlania: Karuzela (>2) lub Lista (<=2) */}
                         {post.products.length > 2 ? (
                             <div className="flex-1 flex items-center justify-center">
                                 <Carousel className="w-full max-w-[280px] lg:max-w-full" opts={{ align: "start", loop: true }}>
@@ -311,6 +321,7 @@ const SinglePost = () => {
           </article>
         ) : (
           /* --- TRYB EDYCJI --- */
+          /* Wyświetlany tylko jeśli canManage jest true  */
           <div className='w-full'>
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader>
@@ -334,9 +345,6 @@ const SinglePost = () => {
                   </div>
 
                   <div className="bg-slate-950 p-6 rounded-lg border border-slate-800">
-                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                          <Package className="text-blue-500" size={20}/> Powiązane produkty
-                      </h3>
                       <AiProductSuggester 
                           title={title} 
                           description={description}

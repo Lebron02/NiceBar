@@ -7,6 +7,7 @@ import { useShop } from "../../services/ShopContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock } from "lucide-react";
+import { toast } from "sonner";
 
 const stripePromise = loadStripe("pk_test_51SaLzIGxlBSq9jXCnf5BpZwAvFbHBIrHdPsOExtYwvc1wYS4LraUr29Ag3I7JYU40AtQkLbGYMcD12TJO7dZJLYJ00NA9MCwUA");
 
@@ -45,11 +46,14 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
           paymentIntentId: paymentIntent.id,
         });
         
+        // Czyścimy koszyk tylko jeśli płatność była robiona zaraz po złożeniu zamówienia
         clearCart();
-        alert("Płatność udana!");
-        navigate("/"); 
+        toast.success("Płatność zaakceptowana", {
+            description: "Zamówienie zostało złożone"
+        });
+        navigate("/profile/orders"); 
       } catch (err) {
-        setMessage("Płatność przeszła w Stripe, ale błąd zapisu w bazie.");
+        setMessage("Płatność przeszła w Stripe, ale wystąpił błąd zapisu w bazie.");
         console.error(err);
       } finally {
         setIsProcessing(false);
@@ -87,17 +91,23 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
 };
 
 const PaymentPage = () => {
-  const { state } = useLocation(); 
+  const location = useLocation(); 
   const { api } = useAuth();
   const [clientSecret, setClientSecret] = useState("");
   const dataFetchedRef = useRef(false);
-  const orderId = state?.orderId;
+
+  // Pobieramy parametry z URL (?orderId=...)
+  const searchParams = new URLSearchParams(location.search);
+  // OrderId bierzemy albo ze "state" (przekierowanie z koszyka) albo z "URL" (link z listy zamówień)
+  const orderId = location.state?.orderId || searchParams.get('orderId');
+  // --------------------
 
   useEffect(() => {
     if (dataFetchedRef.current) return;
-    dataFetchedRef.current = true;
-
+    
     if (!orderId) return;
+    
+    dataFetchedRef.current = true;
 
     const initiatePayment = async () => {
       try {
@@ -108,9 +118,7 @@ const PaymentPage = () => {
       }
     };
 
-    if (orderId) {
-        initiatePayment();
-    }
+    initiatePayment();
   }, [orderId, api]);
 
   if (!orderId) return <div className="min-h-screen bg-slate-950 text-red-500 flex items-center justify-center">Błąd: Brak numeru zamówienia.</div>;
@@ -123,7 +131,7 @@ const PaymentPage = () => {
             <Lock className="text-green-500" size={24} />
           </div>
           <CardTitle className="text-white text-2xl">Bezpieczna płatność</CardTitle>
-          <p className="text-slate-400 text-sm mt-2">Dokończ swoje zamówienie</p>
+          <p className="text-slate-400 text-sm mt-2">Zamówienie: <span className="font-mono text-blue-400">{orderId}</span></p>
         </CardHeader>
         <CardContent className="pt-6">
           {clientSecret ? (
@@ -134,7 +142,10 @@ const PaymentPage = () => {
               <CheckoutForm orderId={orderId} clientSecret={clientSecret} />
             </Elements>
           ) : (
-            <div className="text-center text-slate-400 py-10">Ładowanie bramki płatności...</div>
+            <div className="text-center text-slate-400 py-10 flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                Ładowanie bramki płatności...
+            </div>
           )}
         </CardContent>
       </Card>

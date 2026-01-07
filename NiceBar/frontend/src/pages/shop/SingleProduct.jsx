@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { useShop } from '../../services/ShopContext';
 import { getImageUrl } from '../../services/config';
+import { toast } from "sonner"; 
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card"; 
-import { FileText, ShoppingCart, PackageCheck, AlertCircle } from "lucide-react";
+import { FileText, ShoppingCart, PackageCheck, AlertCircle, Plus, Minus } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -19,10 +20,14 @@ const SingleProduct = () => {
   const { slug } = useParams();
   const { api } = useAuth();
   const { addToCart } = useShop();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Stan dla wybranej ilości
+  const [qty, setQty] = useState(1);
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -41,6 +46,33 @@ const SingleProduct = () => {
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
+
+  // Funkcje obsługi licznika
+  const increaseQty = () => {
+    if (product && qty < product.countInStock) {
+        setQty(prev => prev + 1);
+    }
+  };
+
+  const decreaseQty = () => {
+    if (qty > 1) {
+        setQty(prev => prev - 1);
+    }
+  };
+
+  const handleAddToCart = () => {
+      const success = addToCart(product, qty);
+      
+      if (success) {
+        toast.success("Dodano do koszyka", {
+            description: `${qty}x ${product.name} znajduje się w Twoim koszyku.`,
+            action: {
+                label: "Pokaż koszyk",
+                onClick: () => navigate('/cart')
+            }
+        });
+      }
+  };
 
   if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Ładowanie produktu...</div>;
   if (error) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-red-500">{error}</div>;
@@ -107,28 +139,50 @@ const SingleProduct = () => {
             <div className="border-t border-slate-800 pt-6">
               <div className="flex items-end gap-4 mb-6">
                 <p className="text-4xl font-bold text-white">
-                  {product.price} <span className="text-xl text-slate-500 font-normal">PLN</span>
+                  {Number(product.price).toFixed(2)} <span className="text-xl text-slate-500 font-normal">PLN</span>
                 </p>
               </div>
 
               <div className={`flex items-center gap-2 mb-8 ${product.countInStock > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {product.countInStock > 0 ? <PackageCheck size={20} /> : <AlertCircle size={20} />}
                 <span className="font-medium">
-                  {product.countInStock > 0 ? 'Produkt dostępny w magazynie' : 'Produkt obecnie niedostępny'}
+                  {product.countInStock > 0 ? `Dostępne sztuki: ${product.countInStock}` : 'Produkt obecnie niedostępny'}
                 </span>
               </div>
 
-              <Button
-                className="w-full md:w-auto px-8 py-6 text-lg bg-white text-slate-950 hover:bg-slate-200 font-bold"
-                disabled={product.countInStock === 0}
-                onClick={() => {
-                  addToCart(product, 1);
-                  alert("Dodano produkt do koszyka!");
-                }}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                {product.countInStock > 0 ? 'Dodaj do koszyka' : 'Wyprzedane'}
-              </Button>
+              {/* SEKCJA ZAKUPU: Ilość + Przycisk */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                  {product.countInStock > 0 && (
+                      <div className="flex items-center border border-slate-700 rounded-lg bg-slate-900 h-[3.5rem]">
+                          <button 
+                            onClick={decreaseQty}
+                            disabled={qty <= 1}
+                            className="w-12 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
+                          >
+                              <Minus size={18} />
+                          </button>
+                          <div className="w-12 h-full flex items-center justify-center font-bold text-lg text-white border-x border-slate-800">
+                              {qty}
+                          </div>
+                          <button 
+                            onClick={increaseQty}
+                            disabled={qty >= product.countInStock}
+                            className="w-12 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
+                          >
+                              <Plus size={18} />
+                          </button>
+                      </div>
+                  )}
+
+                  <Button
+                    className="h-[3.5rem] text-lg bg-white text-slate-950 hover:bg-slate-200 font-bold"
+                    disabled={product.countInStock === 0}
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    {product.countInStock > 0 ? 'Dodaj do koszyka' : 'Wyprzedane'}
+                  </Button>
+              </div>
             </div>
 
             <div className="prose prose-invert prose-slate max-w-none pt-6 border-t border-slate-800">

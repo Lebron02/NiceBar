@@ -6,10 +6,10 @@ import { getImageUrl } from '../../services/config';
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, ArrowLeft, CreditCard } from "lucide-react";
+import { Trash2, ArrowLeft, CreditCard, Plus, Minus } from "lucide-react";
 
 const CartPage = () => {
-    const { cartItems, removeFromCart, addToCart, cartTotal } = useShop();
+    const { cartItems, removeFromCart, updateCartItemQuantity, cartTotalDisplay, formatPrice } = useShop();
     const { isLoggedIn } = useAuth();
 
     const navigate = useNavigate();
@@ -19,6 +19,19 @@ const CartPage = () => {
             navigate('/place-order'); 
         } else {
             navigate('/login?redirect=/place-order'); 
+        }
+    };
+
+    // Helpery do obsługi zmiany ilości
+    const handleIncrease = (item) => {
+        if (item.qty < item.product.countInStock) {
+            updateCartItemQuantity(item.product._id, item.qty + 1);
+        }
+    };
+
+    const handleDecrease = (item) => {
+        if (item.qty > 1) {
+            updateCartItemQuantity(item.product._id, item.qty - 1);
         }
     };
 
@@ -72,20 +85,32 @@ const CartPage = () => {
                                                     {item.product.name}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className="text-slate-300 font-medium">{item.product.price} PLN</TableCell>
+                                            <TableCell className="text-slate-300 font-medium">{formatPrice(item.product.price)} PLN</TableCell>
+                                            
+                                            {/* ZMIANA: Licznik +/- zamiast selecta */}
                                             <TableCell>
-                                                <select 
-                                                    className="bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    value={item.qty}
-                                                    onChange={(e) => addToCart(item.product, Number(e.target.value) - item.qty)}
-                                                >
-                                                    {[...Array(item.product.countInStock).keys()].map((x) => (
-                                                        <option key={x + 1} value={x + 1}>
-                                                            {x + 1}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <div className="flex items-center border border-slate-700 rounded-md bg-slate-950 h-9 w-fit">
+                                                    <button 
+                                                        onClick={() => handleDecrease(item)}
+                                                        disabled={item.qty <= 1}
+                                                        className="w-8 h-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors rounded-l-md"
+                                                    >
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    <div className="w-10 h-full flex items-center justify-center font-semibold text-sm text-white border-x border-slate-800">
+                                                        {item.qty}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleIncrease(item)}
+                                                        disabled={item.qty >= item.product.countInStock}
+                                                        className="w-8 h-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors rounded-r-md"
+                                                    >
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
+                                               
                                             </TableCell>
+
                                             <TableCell>
                                                 <Button 
                                                     variant="ghost" 
@@ -108,7 +133,7 @@ const CartPage = () => {
                             <h2 className="text-xl font-bold text-white mb-6">Podsumowanie</h2>
                             <div className="flex justify-between mb-3 text-slate-400">
                                 <span>Produkty ({cartItems.reduce((acc, item) => acc + item.qty, 0)}):</span>
-                                <span>{cartTotal} PLN</span>
+                                <span>{cartTotalDisplay} PLN</span>
                             </div>
                             <div className="flex justify-between mb-6 text-slate-400">
                                 <span>Dostawa:</span>
@@ -117,7 +142,7 @@ const CartPage = () => {
                             <div className="border-t border-slate-800 my-6"></div>
                             <div className="flex justify-between items-end font-bold text-white mb-8">
                                 <span className="text-lg">Do zapłaty:</span>
-                                <span className="text-2xl">{cartTotal} <span className="text-sm font-normal text-slate-500">PLN</span></span>
+                                <span className="text-2xl">{cartTotalDisplay} <span className="text-sm font-normal text-slate-500">PLN</span></span>
                             </div>
                             <Button 
                                 className="w-full bg-white text-slate-950 hover:bg-slate-200 font-bold py-6 text-lg" 

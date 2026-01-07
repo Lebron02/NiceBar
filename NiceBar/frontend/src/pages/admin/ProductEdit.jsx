@@ -23,7 +23,7 @@ const ProductEdit = () => {
 
     const [formData, setFormData] = useState({
         name: '',
-        price: 0,
+        price: '',
         slug: '',
         images: [],
         brand: '',
@@ -57,6 +57,7 @@ const ProductEdit = () => {
 
                     setFormData({
                         ...data,
+                        price: data.price,
                         category: categoryValue,
                         images: data.images || [],
                         relatedPosts: relatedPostsIds
@@ -71,6 +72,13 @@ const ProductEdit = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handlePriceBlur = (e) => {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val)) {
+            setFormData(prev => ({ ...prev, price: val.toFixed(2) }));
+        }
     };
 
     const handleRelatedPostsChange = (newSelectedIds) => {
@@ -88,12 +96,16 @@ const ProductEdit = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            const payload = {
+                ...formData,
+                price: Number(formData.price)
+            };
             if (isEditMode) {
-                await api.put(`/products/${id}`, formData);
+                await api.put(`/products/${id}`, payload);
             } else {
-                await api.post('/products', formData);
+                await api.post('/products', payload);
             }
-            navigate('/admin/dashboard');
+            navigate('/admin/products');
         } catch (error) {
             console.error(error);
             alert("Błąd zapisu produktu");
@@ -138,7 +150,7 @@ const ProductEdit = () => {
         <div className="min-h-screen bg-slate-950 text-slate-300 py-12 flex justify-center px-4">
             <Card className="w-full max-w-3xl bg-slate-900 border-slate-800 h-fit">
                 <CardHeader className="border-b border-slate-800 pb-6">
-                    <CardTitle className="text-white text-2xl">{isEditMode ? 'Edytuj Produkt' : 'Dodaj Nowy Produkt'}</CardTitle>
+                    <CardTitle className="text-white text-2xl">{isEditMode ? 'Edytuj produkt' : 'Dodaj nowy produkt'}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-8">
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -146,7 +158,7 @@ const ProductEdit = () => {
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label className={labelClasses}>Nazwa</Label>
-                                <Input name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Np. Zestaw Barmański Premium" />
+                                <Input name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Np. Zestaw barmański premium" />
                             </div>
 
                             <div className="grid gap-2">
@@ -157,7 +169,7 @@ const ProductEdit = () => {
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="grid gap-2">
                                     <Label className={labelClasses}>Cena (PLN)</Label>
-                                    <Input type="number" name="price" value={formData.price} onChange={handleChange} required className={inputClasses} />
+                                    <Input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} onBlur={handlePriceBlur} required className={inputClasses} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label className={labelClasses}>Ilość w magazynie</Label>
@@ -184,8 +196,8 @@ const ProductEdit = () => {
                                         <option key={cat._id} value={cat.name} />
                                     ))}
                                 </datalist>
-                                <p className="text-xs text-slate-500">Wybierz z listy lub wpisz, aby utworzyć nową.</p>
                             </div>
+                            
 
                             <div className="grid gap-2">
                                 <Label className={labelClasses}>Marka</Label>

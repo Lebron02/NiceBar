@@ -53,7 +53,7 @@ const ChangePasswordForm = ({ onCancel, onSuccess }) => {
             )}
             <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-500 text-white">Zmień hasło</Button>
-                <Button type="button" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">Anuluj</Button>
+                <Button type="button" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-950 hover:bg-slate-800 hover:text-white">Anuluj</Button>
             </div>
         </form>
     );
@@ -90,7 +90,7 @@ const PromoteForm = ({ onCancel, onSuccess }) => {
             )}
             <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-500 text-white">Zatwierdź</Button>
-                <Button type="button" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">Anuluj</Button>
+                <Button type="button" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-950 hover:bg-slate-800 hover:text-white">Anuluj</Button>
             </div>
         </form>
     );
@@ -136,7 +136,7 @@ const UserSettings = () => {
                                     <p className="text-sm text-slate-500">Obecna rola: <Badge variant="outline" className="capitalize ml-1 border-slate-700 text-slate-300">{user.role}</Badge></p>
                                 </div>
                                 {user.role !== 'admin' && (
-                                    <Button variant="outline" onClick={() => setActiveForm('admin')} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">Zostań adminem</Button>
+                                    <Button variant="outline" onClick={() => setActiveForm('admin')} className="border-slate-700 text-slate-950 hover:bg-slate-800 hover:text-white">Zostań adminem</Button>
                                 )}
                             </div>
                         </div>

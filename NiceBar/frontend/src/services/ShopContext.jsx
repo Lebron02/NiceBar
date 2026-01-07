@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext'; 
+import { toast } from "sonner";
 
 const ShopContext = createContext(null);
 
@@ -16,10 +17,23 @@ export const ShopProvider = ({ children }) => {
     }, [cartItems]);
 
     const addToCart = (product, qty = 1) => {
-        setCartItems(prevItems => {
-            const existItem = prevItems.find(item => item.product._id === product._id);
+        let success = false;
 
-            if (existItem) {
+        setCartItems(prevItems => {
+            const existingItem = prevItems.find(item => item.product._id === product._id);
+            const currentQtyInCart = existingItem ? existingItem.qty : 0;
+            const totalRequested = currentQtyInCart + qty;
+
+            if (totalRequested > product.countInStock) {
+                toast.error("Nie można dodać do koszyka", {
+                    description: `Osiągnięto limit magazynowy. Dostępne tylko: ${product.countInStock} szt.`
+                });
+                return prevItems;
+            }
+
+            success = true; 
+
+            if (existingItem) {
                 return prevItems.map(item =>
                     item.product._id === product._id
                         ? { ...item, qty: item.qty + qty }
@@ -28,6 +42,18 @@ export const ShopProvider = ({ children }) => {
             } else {
                 return [...prevItems, { product, qty }];
             }
+        });
+
+        return success;
+    };
+
+    const updateCartItemQuantity = (productId, newQty) => {
+        setCartItems(prevItems => {
+            return prevItems.map(item =>
+                item.product._id === productId
+                    ? { ...item, qty: Number(newQty) }
+                    : item
+            );
         });
     };
 
@@ -40,8 +66,12 @@ export const ShopProvider = ({ children }) => {
         localStorage.removeItem('cartItems');
     };
 
-    const cartTotal = cartItems.reduce((acc, item) => acc + item.qty * item.product.price, 0);
+    const calculateTotal = (items) => {
+        const total = items.reduce((acc, item) => acc + item.qty * item.product.price, 0);
+        return Number(total.toFixed(2));
+    };
 
+    const cartTotal = calculateTotal(cartItems);
 
     const placeOrder = async (shippingAddress, paymentMethod) => {
         // eslint-disable-next-line no-useless-catch
@@ -70,13 +100,20 @@ export const ShopProvider = ({ children }) => {
         }
     };
 
+    const formatPrice = (price) => {
+        return Number(price).toFixed(2);
+    };
+
     const value = {
         cartItems,
         addToCart,
+        updateCartItemQuantity,
         removeFromCart,
         clearCart,
-        cartTotal,
-        placeOrder
+        cartTotal, 
+        cartTotalDisplay: formatPrice(cartTotal),
+        placeOrder,
+        formatPrice
     };
 
     return (

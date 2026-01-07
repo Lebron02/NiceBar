@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useShop } from '../../services/ShopContext';
 import { useAuth } from '../../services/AuthContext';
@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from 'lucide-react';
 
+import { toast } from "sonner";
+
 const PlaceOrder = () => {
-    const { cartItems, cartTotal, placeOrder } = useShop();
+    const { cartItems, cartTotalDisplay, formatPrice, placeOrder } = useShop();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -27,20 +29,36 @@ const PlaceOrder = () => {
     };
 
     const handlePlaceOrder = async () => {
+        // Prosta walidacja formularza przed wysłaniem
+        if (!address.address || !address.city || !address.postalCode || !address.country) {
+            toast.error("Błąd formularza", {
+                description: "Proszę uzupełnić wszystkie pola adresu dostawy."
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             const newOrder = await placeOrder(address, "Card"); 
+            
+            toast.success("Zamówienie złożone!", {
+                description: "Przekierowywanie do płatności..."
+            });
+
             navigate('/payment', { state: { orderId: newOrder._id } });
         } catch (error) {
             console.error(error);
-            alert("Nie udało się złożyć zamówienia. Sprawdź dane.");
+            const errorMessage = error.response?.data?.message || "Nie udało się złożyć zamówienia.";
+            toast.error("Błąd zamówienia", {
+                description: errorMessage
+            });
         } finally {
             setLoading(false);
         }
     };
 
     if (cartItems.length === 0) {
-        navigate('/shop');
+        navigate('/'); 
         return null;
     }
 
@@ -103,7 +121,7 @@ const PlaceOrder = () => {
                                                     <p className="text-xs text-slate-500">Ilość: {item.qty}</p>
                                                 </div>
                                             </div>
-                                            <p className="text-slate-300 text-sm font-medium">{item.qty * item.product.price} PLN</p>
+                                            <p className="text-slate-300 text-sm font-medium">{formatPrice(item.qty * item.product.price)} PLN</p>
                                         </div>
                                     ))}
                                 </div>
@@ -111,7 +129,7 @@ const PlaceOrder = () => {
                                 <div className="border-t border-slate-800 pt-6">
                                     <div className="flex justify-between text-xl font-bold text-white mb-8">
                                         <span>Do zapłaty:</span>
-                                        <span>{cartTotal} PLN</span>
+                                        <span>{cartTotalDisplay} PLN</span>
                                     </div>
 
                                     <Button 
