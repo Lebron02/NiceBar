@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
 
 const CommentsSection = ({ postId, comments, onCommentAdded }) => {
@@ -33,6 +33,27 @@ const CommentsSection = ({ postId, comments, onCommentAdded }) => {
         }
     };
 
+    const handleDeleteComment = async (commentId) => {
+        toast("Czy na pewno usunąć ten komentarz?", {
+            description: "Tej operacji nie będzie można cofnąć.",
+            action: {
+                label: "Usuń",
+                onClick: async () => {
+                    try {
+                        await api.delete(`/posts/${postId}/comments/${commentId}`);
+                        if (onCommentAdded) onCommentAdded();
+                        toast.success("Komentarz usunięty");
+                    } catch (error) {
+                        toast.error("Nie udało się usunąć komentarza");
+                    }
+                },
+            },
+            cancel: {
+                label: "Anuluj",
+            },
+        });
+    }
+
     return (
         <div className="mt-4">
             <h2 className="text-2xl font-bold mb-8 text-white flex items-center gap-3">
@@ -43,25 +64,43 @@ const CommentsSection = ({ postId, comments, onCommentAdded }) => {
                 {comments.length === 0 ? (
                     <p className="text-slate-500 italic">Brak komentarzy. Bądź pierwszy!</p>
                 ) : (
-                    comments.map((comment) => (
-                        <div key={comment._id} className="flex gap-4 p-5 bg-slate-900 border border-slate-800 rounded-xl">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg">
-                                {comment.author?.firstName?.[0]}
-                            </div>
-                            
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="font-semibold text-white">
-                                        {comment.author?.firstName} {comment.author?.lastName}
-                                    </span>
-                                    <span className="text-xs text-slate-500">
-                                        {new Date(comment.createdAt).toLocaleDateString()}
-                                    </span>
+                    comments.map((comment) => {
+                        const canDeleteComment = user && (user._id === comment.author?._id || user.role === 'admin');
+
+                        return (
+                            <div key={comment._id} className="flex gap-4 p-5 bg-slate-900 border border-slate-800 rounded-xl group">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg">
+                                    {comment.author?.firstName?.[0]}
                                 </div>
-                                <p className="text-slate-300 text-sm leading-relaxed">{comment.text}</p>
+                                
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-semibold text-white">
+                                                {comment.author?.firstName} {comment.author?.lastName}
+                                            </span>
+                                            <span className="text-xs text-slate-500">
+                                                {new Date(comment.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        
+                                        {/* PRZYCISK USUWANIA */}
+                                        {canDeleteComment && (
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-6 w-6 text-slate-500 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                                onClick={() => handleDeleteComment(comment._id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{comment.text}</p>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 

@@ -1,4 +1,11 @@
 import * as postService from "../services/postService.js";
+import User from "../models/User.js"; // IMPORTUJEMY MODEL UŻYTKOWNIKA
+
+// Helper do sprawdzania roli
+const checkIsAdmin = async (userId) => {
+    const user = await User.findById(userId);
+    return user && (user.role === 'admin' || user.isAdmin);
+};
 
 export const getPosts = async (req, res) => {
     try {
@@ -37,9 +44,10 @@ export const editPost = async (req, res) => {
     const userId = req.user.userId
 
     try {
-        const post = await postService.updatePost(id, userId, updateData);
+        const isAdmin = await checkIsAdmin(userId); // Sprawdzamy czy admin
+        const post = await postService.updatePost(id, userId, updateData, isAdmin); // Przekazujemy flagę
         if(!post){
-            return res.status(404).json({message: "Błąd modyfikacji posta"})
+            return res.status(404).json({message: "Błąd modyfikacji posta lub brak uprawnień"})
         } 
         res.json(post);
     } catch (error) {
@@ -52,9 +60,10 @@ export const deletePost = async (req, res) => {
     const {id} = req.params;
     const userId = req.user.userId
     try {
-        const post = await postService.deletePost(id, userId);
-    if(!post){
-            res.status(404).json({message: "Błąd usuwania posta"})
+        const isAdmin = await checkIsAdmin(userId); // Sprawdzamy czy admin
+        const post = await postService.deletePost(id, userId, isAdmin); // Przekazujemy flagę
+        if(!post){
+            res.status(404).json({message: "Błąd usuwania posta lub brak uprawnień"})
         } 
         res.json({ message: "Zadanie usunięte" });
     } catch (error) {
@@ -83,7 +92,8 @@ export const deleteComment = async (req, res) => {
     const userId = req.user.userId; 
 
     try {
-        const post = await postService.deleteComment(id, commentId, userId);
+        const isAdmin = await checkIsAdmin(userId); // Sprawdzamy czy admin
+        const post = await postService.deleteComment(id, commentId, userId, isAdmin); // Przekazujemy flagę
         
         if(!post){
             return res.status(404).json({message: "Błąd usuwania komentarza lub brak uprawnień"});

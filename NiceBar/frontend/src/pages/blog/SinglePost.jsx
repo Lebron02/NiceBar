@@ -192,7 +192,9 @@ const SinglePost = () => {
   if (!post) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Post nie istnieje</div>;
 
   const isAuthor = user && post?.userId && user._id === post.userId._id;
-  const canManage = isAuthor; 
+  const isAdmin = user?.role === 'admin';
+  
+  const canManage = isAuthor || isAdmin;
 
   const inputClasses = "bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-blue-500";
   const labelClasses = "text-slate-300";

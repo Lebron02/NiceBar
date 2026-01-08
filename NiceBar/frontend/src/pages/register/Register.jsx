@@ -87,7 +87,7 @@ const Register = () => {
                     </div>
                     <CardTitle className="text-2xl text-center text-white font-bold">Stwórz konto</CardTitle>
                     <CardDescription className="text-center text-slate-400">
-                        Dołącz do nas, aby zamawiać szybciej i wygodniej
+                        Dołącz do nas, aby zamawiać najlepsze artykuły barmańskie
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

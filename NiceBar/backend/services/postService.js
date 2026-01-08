@@ -1,5 +1,5 @@
 import Post from "../models/Post.js";
-import Product from "../models/Product.js"; // Potrzebne do AI
+import Product from "../models/Product.js"; 
 import * as aiService from "./aiService.js";
 
 import slugify from "slugify";
@@ -42,19 +42,25 @@ export const getPostBySlugOrId = async (identifier) => {
     }
 };
 
-export const updatePost = async (id, userId, updateData) => {
+// ZMODYFIKOWANE: Obsługa isAdmin
+export const updatePost = async (id, userId, updateData, isAdmin = false) => {
     if (updateData.title) {
         updateData.slug = slugify(updateData.title, { lower: true, strict: true });
     }
+    
+    const query = isAdmin ? { _id: id } : { _id: id, userId: userId };
+
     return await Post.findOneAndUpdate(
-        { _id: id, userId: userId },
+        query,
         updateData, 
         { new: true }
     );
 };
 
-export const deletePost = async (id, userId) => {
-    return await Post.findOneAndDelete({ _id: id, userId: userId });
+// ZMODYFIKOWANE: Obsługa isAdmin
+export const deletePost = async (id, userId, isAdmin = false) => {
+    const query = isAdmin ? { _id: id } : { _id: id, userId: userId };
+    return await Post.findOneAndDelete(query);
 };
 
 export const addComment = async (postId, userId, text) => {
@@ -69,12 +75,19 @@ export const addComment = async (postId, userId, text) => {
     ).populate("comments.author", "firstName lastName");
 };
 
-export const deleteComment = async (id, commentId, userId) => {
+// ZMODYFIKOWANE: Obsługa isAdmin przy usuwaniu komentarza
+export const deleteComment = async (id, commentId, userId, isAdmin = false) => {
+    // Jeśli admin -> usuń komentarz o danym ID niezależnie od autora
+    // Jeśli user -> usuń komentarz o danym ID TYLKO jeśli autor się zgadza
+    const pullQuery = isAdmin 
+        ? { _id: commentId } 
+        : { _id: commentId, author: userId };
+
     return await Post.findByIdAndUpdate(
         id,
         {
             $pull: {
-                comments: { _id: commentId, author: userId}
+                comments: pullQuery
             }
         },
         { new: true }

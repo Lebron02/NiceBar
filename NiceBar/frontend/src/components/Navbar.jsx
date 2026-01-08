@@ -10,7 +10,7 @@ const Navbar = () => {
     const { isLoggedIn, logout } = useAuth();
 
     const navLinks = [
-        { name: 'Home', url: '/' },
+        { name: 'Sklep', url: '/' },
         { name: 'Blog', url: '/blog' },
         { name: 'Koszyk', url: '/cart' },
         { name: 'Konto', url: '/account' },
