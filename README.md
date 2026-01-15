@@ -181,7 +181,7 @@ Testy backendowe zrealizowane za pomocą **Jest** oraz **Supertest**. Weryfikuj�
 ```bash
 docker exec -it nicebar-backend-1 npm test
 ```
-### 3. Przypadki testowe – testy manualne (Test Case)
+# Przypadki testowe – testy manualne 
 Poniżej przedstawiono scenariusze testowe weryfikujące zarówno główne ścieżki użytkownika, jak i przypadki brzegowe.
 
 ---
