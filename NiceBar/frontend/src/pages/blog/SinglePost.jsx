@@ -153,7 +153,16 @@ const SinglePost = () => {
   };
 
   const handleAddToCart = (product) => {
-    addToCart(product, 1);
+    const success = addToCart(product);
+    if (success) {
+      toast.success("Dodano do koszyka", {
+          description: `${1}x ${product.name} znajduje się w Twoim koszyku.`,
+          action: {
+              label: "Pokaż koszyk",
+              onClick: () => navigate('/cart')
+          }
+      });
+    }
   };
 
   const ProductCard = ({ product }) => (
@@ -342,7 +351,7 @@ const SinglePost = () => {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="description" className={labelClasses}>Treść</Label>
-                        <Textarea id="description" className={`min-h-[300px] ${inputClasses}`} value={description} onChange={(e) => setDescription(e.target.value)} required />
+                        <Textarea id="description" className={`min-h-[200px] ${inputClasses}`} value={description} onChange={(e) => setDescription(e.target.value)} required />
                     </div>
                   </div>
 

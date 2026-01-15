@@ -147,14 +147,13 @@ const ProductEdit = () => {
     const labelClasses = "text-slate-300";
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-300 py-12 flex justify-center px-4">
+        <div className="min-h-screen bg-slate-950 text-slate-300 py-12 flex justify-center px-2">
             <Card className="w-full max-w-3xl bg-slate-900 border-slate-800 h-fit">
-                <CardHeader className="border-b border-slate-800 pb-6">
+                <CardHeader className="border-b border-slate-800 pb-2">
                     <CardTitle className="text-white text-2xl">{isEditMode ? 'Edytuj produkt' : 'Dodaj nowy produkt'}</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-8">
+                <CardContent className="pt-0">
                     <form onSubmit={handleSubmit} className="space-y-8">
-
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label className={labelClasses}>Nazwa</Label>
@@ -228,7 +227,7 @@ const ProductEdit = () => {
                         </div>
 
                         <div className="grid gap-3 pt-2">
-                            <Label className={labelClasses}>Zdjęcia Produktu</Label>
+                            <Label className={labelClasses}>Zdjęcia produktu</Label>
                             
                             <div className="flex items-center gap-4">
                                 <label className="flex-1 cursor-pointer">
@@ -266,7 +265,7 @@ const ProductEdit = () => {
                             )}
                         </div>
 
-                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 mt-4" disabled={loading}>
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6" disabled={loading}>
                             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (
                                 <span className="flex items-center text-lg">
                                     <Save className="mr-2 h-5 w-5" /> {isEditMode ? 'Zaktualizuj produkt' : 'Utwórz produkt'}

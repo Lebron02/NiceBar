@@ -129,7 +129,7 @@ const AddPost = () => {
                             name="description" 
                             value={formData.description} 
                             onChange={handleChange} 
-                            className={`min-h-[200px] ${inputClasses}`}
+                            className={`min-h-[100px] ${inputClasses}`}
                             placeholder="O czym chcesz napisać?"
                             required 
                         />

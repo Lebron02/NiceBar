@@ -84,7 +84,7 @@ const CheckoutForm = ({ orderId, clientSecret }) => {
         disabled={isProcessing || !stripe || !elements} 
         className="w-full bg-white text-slate-950 hover:bg-slate-300 font-bold py-6"
       >
-        {isProcessing ? "Przetwarzanie..." : "Zapłać teraz bezpiecznie"}
+        {isProcessing ? "Przetwarzanie..." : "Zapłać teraz"}
       </Button>
     </form>
   );

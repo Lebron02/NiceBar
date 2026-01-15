@@ -202,7 +202,7 @@ const SingleProduct = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               {product.relatedPosts.map((post) => (
-                <Card key={post._id} className="flex flex-col h-full bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors overflow-hidden group">
+                <Card key={post._id} className="flex flex-col h-full bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors overflow-hidden group p-0">
                   <Link to={`/blog/${post.slug}`} className="block h-48 overflow-hidden bg-slate-950 relative">
                     {post.images && post.images.length > 0 ? (
                       <img
