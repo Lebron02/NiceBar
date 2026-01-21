@@ -245,13 +245,13 @@ Poniżej przedstawiono scenariusze testowe weryfikujące zarówno główne ście
 
 ### TC005 – Weryfikacja uprawnień aktualizacji produktu 
 
-<img src="./images/Test5.png" alt="Dodanie produktu bez konta" width="1000" />
+<img src="./images/Test5.png" alt="Aktualizacja produktu bez konta" width="1000" />
 
 | Pole | Opis |
 |------|------|
 | **ID** | TC005 |
 | **Tytuł** | Blokada aktualizacji produktu przez osobę bez uprawnień |
-| **Warunki początkowe** | Użytkownik niezalogowany |
+| **Warunki początkowe** | Użytkownik jest niezalogowany |
 | **Kroki testowe** | 1. Wyślij żądanie PUT na endpoint `/api/products/{id}`<br>2. Sprawdź kod odpowiedzi HTTP |
 | **Oczekiwany rezultat** | Serwer zwraca kod 401 Unauthorized. Produkt nie zostaje zaktualizowany w bazie danych. |
 
@@ -279,8 +279,8 @@ Poniżej przedstawiono scenariusze testowe weryfikujące zarówno główne ście
 | Pole | Opis |
 |------|------|
 | **ID** | TC007 |
-| **Tytuł** | Użytkownik jest zalogowany i znajduje się w panelu użytkownika |
-| **Warunki początkowe** | Użytkownik jest zal |
+| **Tytuł** | Zmiana domyślnego adresu dostawy |
+| **Warunki początkowe** | Użytkownik jest zalogowany i znajduje się w panelu użytkownika  |
 | **Kroki testowe** | 1. W formularzu adresu zmień wyświetlane dane na inną wartość .<br>2. Kliknij przycisk "Aktualizuj" |
 | **Oczekiwany rezultat** | Pojawia się komunikat o sukcesie. Po automatycznym odświeżeniu widoku w polu widnieje nowa wartość. |
 
