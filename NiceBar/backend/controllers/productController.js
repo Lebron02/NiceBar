@@ -24,6 +24,9 @@ export const createProduct = async (req, res) => {
         const product = await productService.createProduct(req.body);
         res.status(201).json(product);
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: "Błąd tworzenia produktu" });
     }
 };
@@ -34,6 +37,9 @@ export const updateProduct = async (req, res) => {
         if (!product) return res.status(404).json({ message: "Produkt nie znaleziony" });
         res.json(product);
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: "Błąd aktualizacji" });
     }
 };

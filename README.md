@@ -181,7 +181,7 @@ Testy backendowe zrealizowane za pomocą **Jest** oraz **Supertest**. Weryfikuj�
 ```bash
 docker exec -it nicebar-backend-1 npm test
 ```
-### 3. Przypadki testowe – testy manualne (Test Case)
+# Przypadki testowe – testy manualne 
 Poniżej przedstawiono scenariusze testowe weryfikujące zarówno główne ścieżki użytkownika, jak i przypadki brzegowe.
 
 ---
@@ -286,7 +286,7 @@ Poniżej przedstawiono scenariusze testowe weryfikujące zarówno główne ście
 
 ---
 
-### TC008 – Edycja ceny produktu przez Administratora
+### TC008 – Edycja ceny produktu przez administratora
 
 <img src="./images/Test8.png" alt="Edycja produktu" width="1000" />
 

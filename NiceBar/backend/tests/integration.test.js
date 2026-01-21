@@ -174,7 +174,7 @@ describe('API Integration Tests', () => {
             .send(invalidProduct);
 
         // Oczekujemy błędu walidacji 400 (Bad Request)
-        expect([400, 500]).toContain(res.statusCode); 
+        expect([400]).toContain(res.statusCode); 
     });
 
     // TEST 12

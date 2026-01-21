@@ -29,7 +29,7 @@ const AiPostSuggester = ({
             
             const suggestedIds = data.suggestedPostIds || [];
             
-            // Łączenie obecnych z nowymi (bez duplikatów)
+            // Łączenie obecnych postów z nowymi (bez duplikatów)
             const newSelection = [...new Set([...selectedPosts, ...suggestedIds])];
             onSelectionChange(newSelection);
             
