@@ -6,11 +6,6 @@ Built from scratch using the **MERN** stack (MongoDB, Express.js, React, Node.js
 
 The entire environment is containerized using **Docker**, ensuring deterministic execution and easy deployment.
 
-## 🎥 Video Presentation (Live Demo)
-Due to the necessity of configuring external API keys, I have prepared video recordings demonstrating the full system operation in a local environment:
-* [E-commerce & Payments Module (Stripe API)](https://drive.google.com/file/d/1htb5CCs3NcdDUMHNp0WUwT6Xm-fN0LEM/view?usp=drive_link)
-* [Blog & Authentication Module (Express-Session)](https://drive.google.com/file/d/1xTwAVIDrqsDtPar8HiEgixRw4RjM4r8o/view?usp=sharing)
-
 ## ✨ Key Features
 
 ### 🛒 E-commerce & Payments
